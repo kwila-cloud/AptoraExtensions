@@ -33,3 +33,5 @@ jobs:
 
       - name: Run unit tests
         run: go test ./...
+
+# TODO: add frontend job
