@@ -1,6 +1,23 @@
 # Proof-of-concept
 
-The very basic web server to prove that we can successfully pull data from the Aptora DB and display it in the user's web browser
+**Status**: in-progress
+
+## Description
+
+The very basic bare-bones web server to prove that we can successfully pull data from the Aptora MS SQL Server database and display it in the user's web browser. This POC validates the core technical stack (Go backend + React frontend + MSSQL database) and deployment workflow before building more complex features.
+
+## Design Decisions
+
+### Frontend Serving Strategy
+- **Decision**: Use Go's `embed` package to bundle React build into the binary
+- **Pros**: Single executable deployment, version consistency, simpler systemd service
+- **Cons**: Larger binary size, full recompile for frontend changes
+- **Mitigation**: `--dev-mode` flag serves from disk with hot-reload during development
+
+### Authentication
+- **Decision**: No authentication for POC
+- **Rationale**: Internal network only, focus on core functionality first
+- **Future**: See spec 001-implement-basic-auth.md for post-POC auth plan
 
 ## Task List
 

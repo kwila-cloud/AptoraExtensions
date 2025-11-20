@@ -1,20 +1,14 @@
 # Basic Authentication
 
-**Status**: Planned (Post-POC)
+**Status**: pending
 
-Implement basic authentication system to secure access to Aptora Extensions.
+## Description
 
-## Goals
+Implement basic authentication system to secure access to Aptora Extensions. This will prevent unauthorized access to sensitive Aptora data while maintaining low friction for legitimate users. POC (spec 000) runs without authentication on internal network only - this spec addresses production security requirements.
 
-- Prevent unauthorized access to Aptora data
-- Simple user management
-- Minimal friction for legitimate users
+## Design Decisions
 
-## Notes
-
-- Aptora database has users and hashed passwords, but hash algorithm is unknown
-- Do NOT attempt to use Aptora passwords directly
-- POC will run without authentication (internal network only)
+TBD - could we use Aptora's users somehow? Password hash algorithm unknown.
 
 ## Task List
 
