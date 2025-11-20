@@ -61,10 +61,10 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - [x] Set up Go project following best practices
   - [x] Structure modules with `cmd/server` entrypoint and `internal/...` packages
   - [x] Use `slog` for structured logging
-- [ ] Set up backend CI jobs in GitHub workflow (GitHub-hosted `ubuntu-latest` runners)
-  - [ ] `go vet` (Go static analysis)
-  - [ ] `go fmt` check (format verification)
-  - [ ] Unit tests with `go test`
+- [x] Set up backend CI jobs in GitHub workflow (GitHub-hosted `ubuntu-latest` runners)
+  - [x] `go vet` (Go static analysis)
+  - [x] `go fmt` check (format verification)
+  - [x] Unit tests with `go test`
 - [x] Set up environment variable configuration (use real Aptora dev server per `docs/dev-server.md`)
   - [x] Use `godotenv` package for loading `.env` in dev mode
   - [x] Read environment variables with `os.Getenv()`
@@ -78,7 +78,11 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Frontend Creation
 
-- [ ] Set up React project following best practices
+- [ ] Set up React 18+ project with TypeScript and Vite
+  - [ ] Use Vite for build tooling (faster dev server, as mentioned in spec)
+  - [ ] Configure TypeScript for type safety
+  - [ ] No testing framework for POC (focus on functionality first)
+- [ ] Add React Router v7 for client-side routing
 - [ ] Set up frontend CI jobs in GitHub workflow
   - [ ] ESLint (linting)
   - [ ] Prettier check (format verification)
