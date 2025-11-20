@@ -48,6 +48,10 @@
 - Production: systemd service uses `EnvironmentFile=/opt/aptora-extensions/.env`
 - Development: `godotenv` package loads `.env` file in dev mode
 - No config parsing library needed - use Go's built-in `os.Getenv()`
+- Required variables:
+  - `DB_HOST`, `DB_PORT` (shared - both databases on same SQL Server instance)
+  - `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only connection)
+  - `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write connection)
 
 ### Benefits
 - Simplest approach - no YAML/TOML/JSON parsing
@@ -85,16 +89,19 @@
 - Go's `embed` package bundles React build into the binary
 - Single executable deployment - no separate static files needed
 - Frontend and backend versions always in sync
+- Server listens on hardcoded port 80 (HTTP only - internal network use only)
 
 ### Development
-- `--dev-mode` flag makes Go serve frontend from disk
-- Enables hot-reload for fast iteration
-- Vite/React dev server for instant feedback
+- `--dev-mode` flag makes Go proxy frontend requests to Vite dev server
+- Go backend runs on port 8080, proxies `/` requests to Vite on port 5173
+- Enables hot-reload for fast iteration with Vite's instant feedback
+- API requests handled directly by Go backend
 
 ### Benefits
 - Simplifies deployment (single binary to copy)
 - Eliminates version mismatch issues
 - Maintains fast dev workflow with hot-reload
+- No need for separate nginx/reverse proxy in production
 
 ## To Do
 

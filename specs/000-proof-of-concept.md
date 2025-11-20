@@ -18,12 +18,14 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - **Decision**: Monorepo with `/backend`, `/frontend`, and `/deploy` directories at root
 - **Rationale**: Clear separation of concerns, easy navigation, simple for small team
 - **Build coordination**: Single justfile at root orchestrates frontend and backend builds
+- **Deployment**: Deployment scripts and systemd configs live in `/deploy` directory
 
 ### Frontend Serving Strategy
 - **Decision**: Use Go's `embed` package to bundle React build into the binary
 - **Pros**: Single executable deployment, version consistency, simpler systemd service
 - **Cons**: Larger binary size, full recompile for frontend changes
-- **Mitigation**: `--dev-mode` flag serves from disk with hot-reload during development
+- **Mitigation**: `--dev-mode` flag proxies frontend requests to Vite dev server (Go on :8080, Vite on :5173)
+- **Production**: Server listens on hardcoded port 80 (HTTP only - internal network use only)
 
 ### Frontend Routing
 - **Decision**: React Router v7 for client-side routing
@@ -65,9 +67,10 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - [ ] Set up environment variable configuration
   - [ ] Use `godotenv` package for loading `.env` in dev mode
   - [ ] Read environment variables with `os.Getenv()`
-  - [ ] Required variables:
-    - [ ] `APTORA_DB_HOST`, `APTORA_DB_PORT`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD`
-    - [ ] `EXTENSIONS_DB_HOST`, `EXTENSIONS_DB_PORT`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD`
+  - [ ] Required variables (both databases on same SQL Server instance):
+    - [ ] `DB_HOST`, `DB_PORT` (shared by both databases)
+    - [ ] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
+    - [ ] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
 - [ ] Create `.env.example` file with all required variables
 - [ ] Add `.env` to `.gitignore`
 - [ ] Add backend getting started info to CONTRIBUTING.md
@@ -79,8 +82,8 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [ ] ESLint (linting)
   - [ ] Prettier check (format verification)
 - [ ] Set up backend to serve frontend using Go's `embed` package
-  - [ ] Production: embed React build into Go binary
-  - [ ] Development: `--dev-mode` flag to serve from disk with hot-reload
+  - [ ] Production: embed React build into Go binary, listen on port 80
+  - [ ] Development: `--dev-mode` flag proxies frontend requests to Vite dev server (Go on :8080, Vite on :5173)
 - [ ] Add frontend getting started info to CONTRIBUTING.md
 
 ### Build Set Up
@@ -110,6 +113,10 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - [ ] Create simple health check table in Extensions DB to verify write access
   - [ ] Table: `health_check` with `id` and `timestamp` columns
   - [ ] Insert test row on startup to verify connection works
+- [ ] Create health check HTTP endpoint
+  - [ ] `GET /health` returns 200 OK if both database connections are healthy
+  - [ ] Returns 503 Service Unavailable if either database is unreachable
+  - [ ] Include basic status info in response (e.g., database connectivity status)
 - [ ] Create simple endpoint that allows querying employees from the DB
   - [ ] Only return ID and name
 - [ ] Create simple endpoint that allows querying invoices from the DB
