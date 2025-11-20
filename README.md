@@ -1,10 +1,6 @@
 # Aptora Extensions
 
-Web server extensions that enhance the Aptora MS SQL Server database with additional functionality and improved user interfaces.
-
-## Overview
-
-Aptora Extensions provides a modern web interface for accessing and analyzing data from your Aptora database. Built for internal use, it focuses on optimizing tedious tasks and providing intuitive data visualization.
+Aptora Extensions provides a modern web interface for accessing and analyzing data from your [Aptora](http://aptora.com) database. Built to be self-hosted on an internal network, it focuses on optimizing tedious tasks and providing intuitive data visualization.
 
 ## Quick Start
 
@@ -35,14 +31,7 @@ just build-backend
 # Must use sudo to listen on port 80
 sudo ./aptora-extensions
 ```
-You can access at `localhost:80`
-
-## Tech Stack
-
-- **Frontend**: React 19.2 + TypeScript + Vite + Tailwind CSS
-- **Backend**: Go 1.25 + Chi router
-- **Database**: Microsoft SQL Server (Aptora + Extensions databases)
-- **Deployment**: Single Go binary with embedded frontend
+You can access at `0.0.0.0:80` (or from any other device on the network)
 
 ## Key Features
 
@@ -54,16 +43,4 @@ You can access at `localhost:80`
 
 ## Architecture
 
-The project uses a monorepo structure with:
-- `/backend` - Go server with embedded frontend
-- `/frontend` - React application
-- Single `justfile` coordinates builds
-- Environment-based configuration
-
-## Development
-
-Frontend runs on port 5173, backend proxies API calls and serves the React app in development. In production, the frontend is embedded into the Go binary for simplified deployment.
-
-## Current Status
-
-**Proof-of-Concept Phase**: Validating core database connectivity and basic web interface functionality.
+See [ARCHITECTURE.md](./ARCHITECTURE.md).
