@@ -3,8 +3,8 @@
 # Build the frontend and copy to backend assets
 build-frontend:
     cd frontend && npm run build
-    mkdir -p backend/internal/server/assets
-    cp -r frontend/dist/* backend/internal/server/assets/
+    mkdir -p backend/internal/server/built-frontend
+    cp -r frontend/dist/* backend/internal/server/built-frontend/
 
 # Build the backend (embed frontend assets)
 build-backend: build-frontend
@@ -17,12 +17,8 @@ dev:
     # Start backend in dev mode
     cd backend && go run ./cmd/server --dev
 
-# Run production mode
-prod: build-backend
-    ./aptora-extensions
-
 # Clean build artifacts
 clean:
     rm -rf frontend/dist
-    rm -rf backend/assets
+    rm -rf backend/internal/server/built-frontend
     rm -f aptora-extensions

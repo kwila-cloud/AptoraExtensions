@@ -4,17 +4,20 @@ import (
 	"context"
 	"embed"
 	"errors"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 )
 
-//go:embed assets
-var FS embed.FS
+//go:embed built-frontend/**/*
+var staticFiles embed.FS
 
 type Server struct {
 	logger     *slog.Logger
@@ -45,8 +48,47 @@ func (s *Server) registerRoutes() {
 	if s.devMode {
 		s.router.HandleFunc("/*", s.proxyToVite)
 	} else {
-		s.router.Handle("/*", http.FileServer(http.FS(FS)))
+		s.router.HandleFunc("/*", s.serveAssets)
 	}
+}
+
+func (s *Server) serveAssets(w http.ResponseWriter, r *http.Request) {
+	sub, err := fs.Sub(staticFiles, "built-frontend")
+	if err != nil {
+		s.logger.Error("failed to find built-frontend", "err", err)
+	}
+	fileServer := http.FileServer(http.FS(sub))
+
+	entries, err := staticFiles.ReadDir(".")
+	if err != nil {
+		s.logger.Error("failed to read directory", "err", err)
+	}
+
+	for _, e := range entries {
+		s.logger.Info(e.Name())
+	}
+
+	// If path maps to a real file in the embedded fs, serve it.
+	// Otherwise, serve index.html (SPA fallback).
+	requestPath := path.Clean(r.URL.Path)
+
+	// Try to open the requested file
+	if f, err := staticFiles.Open(strings.TrimPrefix(requestPath, "/")); err == nil {
+		// file exists — close and serve normally
+		_ = f.Close()
+		fileServer.ServeHTTP(w, r)
+		return
+	}
+
+	// Not found — return index.html for client-side routing
+	data, err := fs.ReadFile(sub, "index.html")
+	if err != nil {
+		s.logger.Error("failed to find index.html", slog.Any("error", err))
+		http.Error(w, "index.html not found", 500)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(data)
 }
 
 func (s *Server) proxyToVite(w http.ResponseWriter, r *http.Request) {
