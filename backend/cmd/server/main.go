@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
@@ -12,7 +13,8 @@ func main() {
 	logger := slog.New(handler)
 
 	srv := server.NewServer(logger)
-	if err := srv.Start(); err != nil {
+	ctx := context.Background()
+	if err := srv.Run(ctx, ":8080"); err != nil {
 		logger.Error("server failed", slog.Any("error", err))
 		os.Exit(1)
 	}

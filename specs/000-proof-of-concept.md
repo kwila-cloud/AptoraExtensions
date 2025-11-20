@@ -58,9 +58,9 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Backend Creation
 
-- [ ] Set up Go project following best practices
-  - [ ] Structure modules with `cmd/server` entrypoint and `internal/...` packages
-  - [ ] Use `slog` for structured logging
+- [x] Set up Go project following best practices
+  - [x] Structure modules with `cmd/server` entrypoint and `internal/...` packages
+  - [x] Use `slog` for structured logging
 - [ ] Set up backend CI jobs in GitHub workflow (GitHub-hosted `ubuntu-latest` runners)
   - [ ] `go vet` (Go static analysis)
   - [ ] `go fmt` check (format verification)
@@ -69,9 +69,9 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [ ] Use `godotenv` package for loading `.env` in dev mode
   - [ ] Read environment variables with `os.Getenv()`
   - [ ] Required variables (both databases on same SQL Server instance):
-    - [ ] `DB_HOST`, `DB_PORT` (shared by both databases)
-    - [ ] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
-    - [ ] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
+    - [x] `DB_HOST`, `DB_PORT` (shared by both databases)
+    - [x] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
+    - [x] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
 - [ ] Create `.env.example` file with all required variables
 - [ ] Add `.env` to `.gitignore`
 - [ ] Add backend getting started info to CONTRIBUTING.md
