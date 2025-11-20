@@ -22,8 +22,16 @@
 
 ### Low Friction
 
-- The interface should be intuitive and bare bones.
-- Practicality trumps aesthetic in every design decision.
+- The interface should be intuitive and minimal.
+- Minimize clicks and cognitive load.
+- Use clean, functional UI without unnecessary decoration.
+- Practicality trumps aesthetic - polished is good, but ugliness that hinders usability should be avoided.
+
+### Maintainability
+
+- Code should be easy to understand, debug, and extend.
+- Optimize for minimal engineering time while maintaining code quality.
+- Clear structure and documentation to support long-term evolution.
 
 ### Secure
 
@@ -33,7 +41,7 @@
 
 ## To Do
 
-- [ ] Determine if we should refine or add any more high level principles
+- [x] Determine if we should refine or add any more high level principles
 - [ ] Figure out a good plan for combining React and Go into a single server with a single open port.
 - [ ] Determine if react router or remix is a better fit.
 - [ ] Determine good file structure to have backend, frontend, and deployments scripts in a single repo.

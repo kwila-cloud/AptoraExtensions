@@ -1,6 +1,6 @@
 # Proof-of-concept
 
-The very basic bare bone web server to prove that the we can successfully pull data from the Aptora DB and display it in the user's web browser
+The very basic web server to prove that we can successfully pull data from the Aptora DB and display it in the user's web browser
 
 ## Task List
 
