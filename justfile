@@ -2,7 +2,7 @@
 
 # Build the frontend and copy to backend assets
 build-frontend:
-    cd frontend && npm run build
+    cd frontend && npm ci && npm run build
     mkdir -p backend/internal/server/built-frontend
     cp -r frontend/dist/* backend/internal/server/built-frontend/
 
