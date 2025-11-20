@@ -6,18 +6,25 @@ Refer to the [architecture document](/ARCHITECTURE.md)
 
 ## Getting Started
 
-### Backend Setup
+### Prerequisites
+
+- `just`
+- `go`
+- `node`
+
+### Run Dev Server
 
 1. Copy `.env.example` to `.env` and fill in your database credentials
-2. Run the backend server:
-   ```bash
-   cd backend
-   go run ./cmd/server
-   ```
+1. `just dev`
+1. Access at `localhost:8080`
 
-### Common Commands
+### Run Producation Server
 
-TODO: add helpful commands for dev environments
+1. Copy `.env.example` to `.env` and fill in your database credentials
+1. `just build-backend`
+1. `sudo ./aptora-extensions`
+  - We must use `sudo` to listen on port 80
+1. Access at `localhost:80`
 
 ## GitHub Issues
 
