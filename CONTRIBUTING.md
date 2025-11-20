@@ -4,28 +4,6 @@
 
 Refer to the [architecture document](/ARCHITECTURE.md)
 
-## Getting Started
-
-### Prerequisites
-
-- `just`
-- `go`
-- `node`
-
-### Run Dev Server
-
-1. Copy `.env.example` to `.env` and fill in your database credentials
-1. `just dev`
-1. Access at `localhost:8080`
-
-### Run Producation Server
-
-1. Copy `.env.example` to `.env` and fill in your database credentials
-1. `just build-backend`
-1. `sudo ./aptora-extensions`
-  - We must use `sudo` to listen on port 80
-1. Access at `localhost:80`
-
 ## GitHub Issues
 
 GitHub issues should be used for bug reports only. Feature requests and refactor requests should be contributed by adding a new file to the `specs/` directory.

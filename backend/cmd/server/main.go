@@ -24,9 +24,9 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	addr := ":80"
+	addr := "0.0.0.0:80"
 	if *devMode {
-		addr = ":8080"
+		addr = "localhost:8080"
 	}
 
 	if err := srv.Run(ctx, addr); err != nil {
