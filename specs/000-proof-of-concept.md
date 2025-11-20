@@ -59,12 +59,13 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Backend Creation
 
 - [ ] Set up Go project following best practices
+  - [ ] Structure modules with `cmd/server` entrypoint and `internal/...` packages
   - [ ] Use `slog` for structured logging
-- [ ] Set up backend CI jobs in GitHub workflow
+- [ ] Set up backend CI jobs in GitHub workflow (GitHub-hosted `ubuntu-latest` runners)
   - [ ] `go vet` (Go static analysis)
   - [ ] `go fmt` check (format verification)
   - [ ] Unit tests with `go test`
-- [ ] Set up environment variable configuration
+- [ ] Set up environment variable configuration (use real Aptora dev server per `docs/dev-server.md`)
   - [ ] Use `godotenv` package for loading `.env` in dev mode
   - [ ] Read environment variables with `os.Getenv()`
   - [ ] Required variables (both databases on same SQL Server instance):
