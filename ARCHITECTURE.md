@@ -3,8 +3,10 @@
 ## Technical Stack (High Level)
 
 - **Frontend**: React v19.2 
-  - React Router or Remix (need to determine best fit)
-  - Some well-maintained package ()
+  - React Router v7 for client-side routing
+  - Vite for build tooling and dev server
+  - Tailwind CSS for styling
+  - TanStack Table for data grid functionality
 - **Backend**: Go v1.25
   - Chi v5.2 for routing and middleware
   - microsoft/go-mssqldb v1.9 for SQL driver
@@ -39,6 +41,44 @@
 - We do NOT want to allow unauthorized data access.
 - We do NOT want to corrupt the Aptora database.
 
+## Configuration
+
+### Environment Variables
+- Configuration via environment variables (12-factor app style)
+- Production: systemd service uses `EnvironmentFile=/opt/aptora-extensions/.env`
+- Development: `godotenv` package loads `.env` file in dev mode
+- No config parsing library needed - use Go's built-in `os.Getenv()`
+
+### Benefits
+- Simplest approach - no YAML/TOML/JSON parsing
+- Systemd handles parsing the `.env` file
+- Easy deployment: just scp the `.env` file
+- Standard across all platforms
+
+## Project Structure
+
+```
+/
+├── backend/           # Go server code
+│   ├── cmd/          # Application entry points
+│   ├── internal/     # Private application code
+│   └── config/       # Configuration handling
+├── frontend/         # React application
+│   ├── src/          # React source code
+│   ├── public/       # Static assets
+│   └── dist/         # Build output (embedded into Go binary)
+├── deploy/           # Deployment scripts and systemd configs
+├── justfile          # Build automation (frontend + backend)
+└── .github/
+    └── workflows/    # CI/CD pipelines
+```
+
+### Rationale
+- **Clear separation**: Frontend and backend are distinct directories
+- **Simple navigation**: Easy to find what you need
+- **Deployment isolation**: `/deploy` keeps deployment concerns separate
+- **Single justfile**: Coordinates builds across frontend and backend
+
 ## Frontend Serving Strategy
 
 ### Production
@@ -60,6 +100,6 @@
 
 - [x] Determine if we should refine or add any more high level principles
 - [x] Figure out a good plan for combining React and Go into a single server with a single open port.
-- [ ] Determine if react router or remix is a better fit.
-- [ ] Determine good file structure to have backend, frontend, and deployments scripts in a single repo.
-- [ ] Flesh out the proof-of-concept spec.
+- [x] Determine if react router or remix is a better fit.
+- [x] Determine good file structure to have backend, frontend, and deployments scripts in a single repo.
+- [x] Flesh out the proof-of-concept spec.

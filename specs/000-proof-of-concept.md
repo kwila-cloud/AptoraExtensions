@@ -8,11 +8,44 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ## Design Decisions
 
+### Configuration System
+- **Decision**: Environment variables with `.env` file
+- **Rationale**: Simplest approach - no config parsing library needed, systemd handles `.env` parsing via `EnvironmentFile`
+- **Development**: Use `godotenv` package to load `.env` in dev mode
+- **Deployment**: scp `.env.production` to server as `.env`
+
+### Project Structure
+- **Decision**: Monorepo with `/backend`, `/frontend`, and `/deploy` directories at root
+- **Rationale**: Clear separation of concerns, easy navigation, simple for small team
+- **Build coordination**: Single justfile at root orchestrates frontend and backend builds
+
 ### Frontend Serving Strategy
 - **Decision**: Use Go's `embed` package to bundle React build into the binary
 - **Pros**: Single executable deployment, version consistency, simpler systemd service
 - **Cons**: Larger binary size, full recompile for frontend changes
 - **Mitigation**: `--dev-mode` flag serves from disk with hot-reload during development
+
+### Frontend Routing
+- **Decision**: React Router v7 for client-side routing
+- **Rationale**: Sufficient for multiple pages (invoices, employees, reports), simpler than Remix, no SSR needed for internal tool
+- **Alternative considered**: Remix (rejected - overkill without SEO requirements, adds complexity with Go already handling backend)
+
+### Frontend Styling & Components
+- **Decision**: Tailwind CSS for styling, TanStack Table for data grid
+- **Rationale**: 
+  - Tailwind aligns with principles (minimal, maintainable, fast iteration)
+  - No component library for POC - add as needed to avoid bloat and duplicate code
+  - TanStack Table is free/open-source with no paid tiers, headless (works with Tailwind), powerful sorting/filtering
+- **Alternative considered**: AG Grid (rejected - has paid tiers, vendor lock-in concerns)
+
+### Error Handling
+- **Decision**: Simple error handling for POC - log errors and return 500s
+- **Rationale**: Focus on happy path first, can add structured errors later
+- **Future**: Add proper HTTP status codes and error responses post-POC
+
+### Logging
+- **Decision**: Use Go's `slog` package (structured logging)
+- **Rationale**: Standard library (no dependencies), structured output, sufficient for needs
 
 ### Authentication
 - **Decision**: No authentication for POC
@@ -24,22 +57,27 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Backend Creation
 
 - [ ] Set up Go project following best practices
-- [ ] Set up backend jobs in CI GitHub workflow
-- [ ] Set up configuration system that makes it easy to configure the following from a single file
-  - [ ] Aptora database URL
-  - [ ] Aptora database port
-  - [ ] Aptora database username
-  - [ ] Aptora database password
-  - [ ] Aptora Extensions database URL
-  - [ ] Aptora Extensions database port
-  - [ ] Aptora Extensions database username
-  - [ ] Aptora Extensions database password
+  - [ ] Use `slog` for structured logging
+- [ ] Set up backend CI jobs in GitHub workflow
+  - [ ] `go vet` (Go static analysis)
+  - [ ] `go fmt` check (format verification)
+  - [ ] Unit tests with `go test`
+- [ ] Set up environment variable configuration
+  - [ ] Use `godotenv` package for loading `.env` in dev mode
+  - [ ] Read environment variables with `os.Getenv()`
+  - [ ] Required variables:
+    - [ ] `APTORA_DB_HOST`, `APTORA_DB_PORT`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD`
+    - [ ] `EXTENSIONS_DB_HOST`, `EXTENSIONS_DB_PORT`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD`
+- [ ] Create `.env.example` file with all required variables
+- [ ] Add `.env` to `.gitignore`
 - [ ] Add backend getting started info to CONTRIBUTING.md
 
 ### Frontend Creation
 
 - [ ] Set up React project following best practices
-- [ ] Set up frontend jobs in CI GitHub workflow
+- [ ] Set up frontend CI jobs in GitHub workflow
+  - [ ] ESLint (linting)
+  - [ ] Prettier check (format verification)
 - [ ] Set up backend to serve frontend using Go's `embed` package
   - [ ] Production: embed React build into Go binary
   - [ ] Development: `--dev-mode` flag to serve from disk with hot-reload
@@ -55,10 +93,13 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Deployment Script
 
 - [ ] Create systemd service file for running the backend
+  - [ ] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
+  - [ ] Set `WorkingDirectory=/opt/aptora-extensions`
+  - [ ] Configure restart policy and logging
 - [ ] Create deployment script
   - [ ] Stop systemd service on the remote server (if it exists)
   - [ ] scp single binary executable to remote server
-  - [ ] scp config file to remote server
+  - [ ] scp `.env.production` to remote server as `.env`
   - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
   - [ ] Start systemd service
 
@@ -66,15 +107,25 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 - [ ] Create read-only connection to Aptora database
 - [ ] Create read-write connection to Aptora Extensions database
+- [ ] Create simple health check table in Extensions DB to verify write access
+  - [ ] Table: `health_check` with `id` and `timestamp` columns
+  - [ ] Insert test row on startup to verify connection works
 - [ ] Create simple endpoint that allows querying employees from the DB
   - [ ] Only return ID and name
 - [ ] Create simple endpoint that allows querying invoices from the DB
   - [ ] Parameters:
     - [ ] Date range (required)
     - [ ] Employee ID (optional)
+  - [ ] Return all invoice fields from DB (can refine later based on frontend needs)
   - [ ] Do not allow querying more than 500 invoices in one request
 
 ### Simple Frontend
 
-- [ ] Create a single React page that fetches the invoices from last month
-- [ ] Make it easy to filter by employee
+- [ ] Set up Tailwind CSS in React project
+- [ ] Set up TanStack Table
+- [ ] Create a single React page that fetches invoices from last month
+  - [ ] Display all invoice fields returned from DB (refine later)
+  - [ ] Use TanStack Table for spreadsheet-like display
+  - [ ] Implement sorting functionality
+  - [ ] Implement filtering by employee
+  - [ ] Keep UI minimal but polished (align with Low Friction principle)
