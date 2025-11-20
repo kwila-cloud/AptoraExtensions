@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -14,13 +15,21 @@ func main() {
 	handler := slog.NewTextHandler(os.Stdout, nil)
 	logger := slog.New(handler)
 
-	srv := server.NewServer(logger)
+	devMode := flag.Bool("dev", false, "Enable development mode (proxy to Vite dev server)")
+	flag.Parse()
+
+	srv := server.NewServer(logger, *devMode)
 
 	// Create context that can be cancelled on SIGINT/SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := srv.Run(ctx, ":8080"); err != nil {
+	addr := ":80"
+	if *devMode {
+		addr = ":8080"
+	}
+
+	if err := srv.Run(ctx, addr); err != nil {
 		logger.Error("server failed", slog.Any("error", err))
 		os.Exit(1)
 	}

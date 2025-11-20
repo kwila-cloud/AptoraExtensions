@@ -2,24 +2,32 @@ package server
 
 import (
 	"context"
+	"embed"
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 )
 
+//go:embed assets
+var FS embed.FS
+
 type Server struct {
 	logger     *slog.Logger
 	router     chi.Router
 	httpServer *http.Server
+	devMode    bool
 }
 
-func NewServer(logger *slog.Logger) *Server {
+func NewServer(logger *slog.Logger, devMode bool) *Server {
 	s := &Server{
-		logger: logger,
-		router: chi.NewRouter(),
+		logger:  logger,
+		router:  chi.NewRouter(),
+		devMode: devMode,
 	}
 	s.registerRoutes()
 	return s
@@ -33,6 +41,21 @@ func (s *Server) registerRoutes() {
 			s.logger.Error("failed to write health response", slog.Any("error", err))
 		}
 	})
+
+	if s.devMode {
+		s.router.HandleFunc("/*", s.proxyToVite)
+	} else {
+		s.router.Handle("/*", http.FileServer(http.FS(FS)))
+	}
+}
+
+func (s *Server) proxyToVite(w http.ResponseWriter, r *http.Request) {
+	proxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:5173",
+	})
+
+	proxy.ServeHTTP(w, r)
 }
 
 // Run starts the HTTP server and blocks until the provided context is cancelled
@@ -51,7 +74,7 @@ func (s *Server) Run(ctx context.Context, addr string) error {
 
 	errCh := make(chan error, 1)
 	go func() {
-		s.logger.Info("http server listening", slog.String("addr", addr))
+		s.logger.Info("http server listening", slog.String("addr", addr), slog.Bool("dev_mode", s.devMode))
 		if err := s.httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err
 			return
