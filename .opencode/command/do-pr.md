@@ -13,6 +13,8 @@ If the user input is empty or invalid, use the previously entered spec number fr
 
 Required behavior (non-interactive flow)
 
+**CRITICAL**: This is the IMPLEMENTATION PHASE - all code changes happen here after `/start-pr` approval.
+
 1. Read the spec for the given number in `specs/` and determine the next incomplete section from the Task List.
 2. For each task in the incomplete section:
    - Implement the task.
