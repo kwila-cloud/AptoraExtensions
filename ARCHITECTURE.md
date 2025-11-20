@@ -103,10 +103,3 @@
 - Maintains fast dev workflow with hot-reload
 - No need for separate nginx/reverse proxy in production
 
-## To Do
-
-- [x] Determine if we should refine or add any more high level principles
-- [x] Figure out a good plan for combining React and Go into a single server with a single open port.
-- [x] Determine if react router or remix is a better fit.
-- [x] Determine good file structure to have backend, frontend, and deployments scripts in a single repo.
-- [x] Flesh out the proof-of-concept spec.
