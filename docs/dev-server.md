@@ -42,7 +42,7 @@ I used these steps:
 - `scp` file from laptop to `/root` on ProxMox host
 - From the ProxMox host:
   - `pct exec <CONTAINER-ID> mkdir /var/opt/mssql/backups`
-  - `pct push <CTID> /root/<FILE-NAME>.bak /var/opt/mssql/backups/<FILE-NAME>.bak`
+  - `pct push <CONTAINER-ID> /root/<FILE-NAME>.bak /var/opt/mssql/backups/<FILE-NAME>.bak`
 
 ### Restore Backup File
 
@@ -68,3 +68,7 @@ WITH
     MOVE 'LogicalLogName' TO '/var/opt/mssql/data/MyDatabase_log.ldf',
     REPLACE;
 ```
+
+Refresh the connection list in your DB client.
+
+Verify you can access the restored DB.
