@@ -121,6 +121,7 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Simple Frontend
 
 - [ ] Set up Tailwind CSS in React project
+- [ ] Remove current unnecessary CSS
 - [ ] Set up TanStack Table
 - [ ] Create a single React page that fetches invoices from last month
   - [ ] Display all invoice fields returned from DB (refine later)
