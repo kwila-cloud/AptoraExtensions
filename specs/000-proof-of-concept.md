@@ -65,16 +65,16 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [ ] `go vet` (Go static analysis)
   - [ ] `go fmt` check (format verification)
   - [ ] Unit tests with `go test`
-- [ ] Set up environment variable configuration (use real Aptora dev server per `docs/dev-server.md`)
-  - [ ] Use `godotenv` package for loading `.env` in dev mode
-  - [ ] Read environment variables with `os.Getenv()`
-  - [ ] Required variables (both databases on same SQL Server instance):
+- [x] Set up environment variable configuration (use real Aptora dev server per `docs/dev-server.md`)
+  - [x] Use `godotenv` package for loading `.env` in dev mode
+  - [x] Read environment variables with `os.Getenv()`
+  - [x] Required variables (both databases on same SQL Server instance):
     - [x] `DB_HOST`, `DB_PORT` (shared by both databases)
     - [x] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
     - [x] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
-- [ ] Create `.env.example` file with all required variables
-- [ ] Add `.env` to `.gitignore`
-- [ ] Add backend getting started info to CONTRIBUTING.md
+- [x] Create `.env.example` file with all required variables
+- [x] Add `.env` to `.gitignore`
+- [x] Add backend getting started info to CONTRIBUTING.md
 
 ### Frontend Creation
 
