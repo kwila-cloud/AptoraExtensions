@@ -40,3 +40,20 @@ The very basic bare bone web server to prove that the we can successfully pull d
   - [ ] scp config file to remote server
   - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
   - [ ] Start systemd service
+
+### Backend Database Connection
+
+- [ ] Create read-only connection to Aptora database
+- [ ] Create read-write connection to Aptora Extensions database
+- [ ] Create simple endpoint that allows querying employees from the DB
+  - [ ] Only return ID and name
+- [ ] Create simple endpoint that allows querying invoices from the DB
+  - [ ] Parameters:
+    - [ ] Date range (required)
+    - [ ] Employee ID (optional)
+  - [ ] Do not allow querying more than 500 invoices in one request
+
+### Simple Frontend
+
+- [ ] Create a single React page that fetches the invoices from last month
+- [ ] Make it easy to filter by employee
