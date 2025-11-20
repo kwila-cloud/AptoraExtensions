@@ -1,0 +1,9 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ['**']
+
+# TODO: add jobs for both frontend and backend
+# Frontend: lint, format check
+# Backend: vet, format check, unit test
