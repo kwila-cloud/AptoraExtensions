@@ -16,7 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-//go:embed built-frontend/**/*
+//go:embed all:built-frontend
 var staticFiles embed.FS
 
 type Server struct {
@@ -53,42 +53,45 @@ func (s *Server) registerRoutes() {
 }
 
 func (s *Server) serveAssets(w http.ResponseWriter, r *http.Request) {
+	// Strip the "built-frontend" prefix from the embedded filesystem
 	sub, err := fs.Sub(staticFiles, "built-frontend")
 	if err != nil {
-		s.logger.Error("failed to find built-frontend", "err", err)
-	}
-	fileServer := http.FileServer(http.FS(sub))
-
-	entries, err := staticFiles.ReadDir(".")
-	if err != nil {
-		s.logger.Error("failed to read directory", "err", err)
-	}
-
-	for _, e := range entries {
-		s.logger.Info(e.Name())
+		s.logger.Error("failed to create sub filesystem", "err", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
 	// If path maps to a real file in the embedded fs, serve it.
 	// Otherwise, serve index.html (SPA fallback).
-	requestPath := path.Clean(r.URL.Path)
-
-	// Try to open the requested file
-	if f, err := staticFiles.Open(strings.TrimPrefix(requestPath, "/")); err == nil {
-		// file exists — close and serve normally
-		_ = f.Close()
-		fileServer.ServeHTTP(w, r)
-		return
+	requestPath := strings.TrimPrefix(path.Clean(r.URL.Path), "/")
+	if requestPath == "" {
+		requestPath = "."
 	}
 
-	// Not found — return index.html for client-side routing
+	// Try to open the requested file
+	if f, err := sub.Open(requestPath); err == nil {
+		stat, err := f.Stat()
+		f.Close()
+
+		// If it's a file (not a directory), serve it
+		if err == nil && !stat.IsDir() {
+			fileServer := http.FileServer(http.FS(sub))
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+	}
+
+	// Not found or is a directory — return index.html for client-side routing
 	data, err := fs.ReadFile(sub, "index.html")
 	if err != nil {
 		s.logger.Error("failed to find index.html", slog.Any("error", err))
-		http.Error(w, "index.html not found", 500)
+		http.Error(w, "404 - Page Not Found", http.StatusNotFound)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html")
-	w.Write(data)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if _, err := w.Write(data); err != nil {
+		s.logger.Error("failed to write index.html response", slog.Any("error", err))
+	}
 }
 
 func (s *Server) proxyToVite(w http.ResponseWriter, r *http.Request) {
