@@ -17,23 +17,27 @@ type Server struct {
 }
 
 func NewServer(logger *slog.Logger) *Server {
-	r := chi.NewRouter()
-	registerRoutes(r)
-
-	return &Server{
+	s := &Server{
 		logger: logger,
-		router: r,
+		router: chi.NewRouter(),
 	}
+	s.registerRoutes()
+	return s
 }
 
-func registerRoutes(r chi.Router) {
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) registerRoutes() {
+	s.router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ok"}`))
+		if _, err := w.Write([]byte(`{"status":"ok"}`)); err != nil {
+			s.logger.Error("failed to write health response", slog.Any("error", err))
+		}
 	})
 }
 
+// Run starts the HTTP server and blocks until the provided context is cancelled
+// or the server exits with an error. Graceful shutdown is handled when
+// the context is cancelled.
 func (s *Server) Run(ctx context.Context, addr string) error {
 	if s.httpServer != nil {
 		return errors.New("server already running")

@@ -25,34 +25,29 @@ type Settings struct {
 func Load() (Settings, error) {
 	_ = godotenv.Load()
 
-	values := map[string]*string{
-		"DB_HOST":                nil,
-		"DB_PORT":                nil,
-		"APTORA_DB_NAME":         nil,
-		"APTORA_DB_USER":         nil,
-		"APTORA_DB_PASSWORD":     nil,
-		"EXTENSIONS_DB_NAME":     nil,
-		"EXTENSIONS_DB_USER":     nil,
-		"EXTENSIONS_DB_PASSWORD": nil,
-	}
-
-	for key := range values {
-		value := strings.TrimSpace(os.Getenv(key))
-		if value == "" {
-			return Settings{}, fmt.Errorf("environment variable %s is required", key)
+	missing := []string{}
+	get := func(k string) string {
+		v := strings.TrimSpace(os.Getenv(k))
+		if v == "" {
+			missing = append(missing, k)
 		}
-		v := value
-		values[key] = &v
+		return v
 	}
 
-	return Settings{
-		DBHost:               *values["DB_HOST"],
-		DBPort:               *values["DB_PORT"],
-		AptoraDBName:         *values["APTORA_DB_NAME"],
-		AptoraDBUser:         *values["APTORA_DB_USER"],
-		AptoraDBPassword:     *values["APTORA_DB_PASSWORD"],
-		ExtensionsDBName:     *values["EXTENSIONS_DB_NAME"],
-		ExtensionsDBUser:     *values["EXTENSIONS_DB_USER"],
-		ExtensionsDBPassword: *values["EXTENSIONS_DB_PASSWORD"],
-	}, nil
+	settings := Settings{
+		DBHost:               get("DB_HOST"),
+		DBPort:               get("DB_PORT"),
+		AptoraDBName:         get("APTORA_DB_NAME"),
+		AptoraDBUser:         get("APTORA_DB_USER"),
+		AptoraDBPassword:     get("APTORA_DB_PASSWORD"),
+		ExtensionsDBName:     get("EXTENSIONS_DB_NAME"),
+		ExtensionsDBUser:     get("EXTENSIONS_DB_USER"),
+		ExtensionsDBPassword: get("EXTENSIONS_DB_PASSWORD"),
+	}
+
+	if len(missing) > 0 {
+		return Settings{}, fmt.Errorf("missing required env vars: %s", strings.Join(missing, ","))
+	}
+
+	return settings, nil
 }
