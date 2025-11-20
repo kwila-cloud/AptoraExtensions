@@ -78,38 +78,25 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Frontend Creation
 
-- [ ] Set up React 18+ project with TypeScript and Vite
-  - [ ] Use Vite for build tooling (faster dev server, as mentioned in spec)
-  - [ ] Configure TypeScript for type safety
-  - [ ] No testing framework for POC (focus on functionality first)
-- [ ] Add React Router v7 for client-side routing
-- [ ] Set up frontend CI jobs in GitHub workflow
-  - [ ] ESLint (linting)
-  - [ ] Prettier check (format verification)
-- [ ] Set up backend to serve frontend using Go's `embed` package
-  - [ ] Production: embed React build into Go binary, listen on port 80
-  - [ ] Development: `--dev-mode` flag proxies frontend requests to Vite dev server (Go on :8080, Vite on :5173)
-- [ ] Add frontend getting started info to CONTRIBUTING.md
+- [x] Set up React v19.2 project with TypeScript and Vite
+  - [x] Use Vite for build tooling (faster dev server, as mentioned in spec)
+  - [x] Configure TypeScript for type safety
+  - [x] No testing framework for POC (focus on functionality first)
+- [x] Add React Router v7 for client-side routing
+- [x] Set up frontend CI jobs in GitHub workflow
+  - [x] ESLint (linting)
+  - [x] Prettier check (format verification)
+- [x] Set up backend to serve frontend using Go's `embed` package
+  - [x] Production: embed React build into Go binary, listen on port 80
+  - [x] Development: `--dev-mode` flag proxies frontend requests to Vite dev server (Go on :8080, Vite on :5173)
+- [x] Add frontend getting started info to CONTRIBUTING.md
 
 ### Build Set Up
 
-- [ ] Create build script with a justfile
-  - [ ] Build frontend (React production build)
-  - [ ] Build backend (embed frontend assets into Go binary)
-  - [ ] Output: single executable binary for deployment
-
-### Deployment Script
-
-- [ ] Create systemd service file for running the backend
-  - [ ] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
-  - [ ] Set `WorkingDirectory=/opt/aptora-extensions`
-  - [ ] Configure restart policy and logging
-- [ ] Create deployment script
-  - [ ] Stop systemd service on the remote server (if it exists)
-  - [ ] scp single binary executable to remote server
-  - [ ] scp `.env.production` to remote server as `.env`
-  - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
-  - [ ] Start systemd service
+- [x] Create build script with a justfile
+  - [x] Build frontend (React production build)
+  - [x] Build backend (embed frontend assets into Go binary)
+  - [x] Output: single executable binary for deployment
 
 ### Backend Database Connection
 
@@ -134,6 +121,7 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Simple Frontend
 
 - [ ] Set up Tailwind CSS in React project
+- [ ] Remove current unnecessary CSS
 - [ ] Set up TanStack Table
 - [ ] Create a single React page that fetches invoices from last month
   - [ ] Display all invoice fields returned from DB (refine later)
@@ -141,3 +129,17 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [ ] Implement sorting functionality
   - [ ] Implement filtering by employee
   - [ ] Keep UI minimal but polished (align with Low Friction principle)
+
+### Deployment Script
+
+- [ ] Create systemd service file for running the backend
+  - [ ] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
+  - [ ] Set `WorkingDirectory=/opt/aptora-extensions`
+  - [ ] Configure restart policy and logging
+- [ ] Create deployment script
+  - [ ] Stop systemd service on the remote server (if it exists)
+  - [ ] scp single binary executable to remote server
+  - [ ] scp `.env.production` to remote server as `.env`
+  - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
+  - [ ] Start systemd service
+

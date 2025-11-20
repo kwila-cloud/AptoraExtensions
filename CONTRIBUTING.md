@@ -4,21 +4,6 @@
 
 Refer to the [architecture document](/ARCHITECTURE.md)
 
-## Getting Started
-
-### Backend Setup
-
-1. Copy `.env.example` to `.env` and fill in your database credentials
-2. Run the backend server:
-   ```bash
-   cd backend
-   go run ./cmd/server
-   ```
-
-### Common Commands
-
-TODO: add helpful commands for dev environments
-
 ## GitHub Issues
 
 GitHub issues should be used for bug reports only. Feature requests and refactor requests should be contributed by adding a new file to the `specs/` directory.
