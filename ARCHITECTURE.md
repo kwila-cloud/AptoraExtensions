@@ -39,10 +39,27 @@
 - We do NOT want to allow unauthorized data access.
 - We do NOT want to corrupt the Aptora database.
 
+## Frontend Serving Strategy
+
+### Production
+- Go's `embed` package bundles React build into the binary
+- Single executable deployment - no separate static files needed
+- Frontend and backend versions always in sync
+
+### Development
+- `--dev-mode` flag makes Go serve frontend from disk
+- Enables hot-reload for fast iteration
+- Vite/React dev server for instant feedback
+
+### Benefits
+- Simplifies deployment (single binary to copy)
+- Eliminates version mismatch issues
+- Maintains fast dev workflow with hot-reload
+
 ## To Do
 
 - [x] Determine if we should refine or add any more high level principles
-- [ ] Figure out a good plan for combining React and Go into a single server with a single open port.
+- [x] Figure out a good plan for combining React and Go into a single server with a single open port.
 - [ ] Determine if react router or remix is a better fit.
 - [ ] Determine good file structure to have backend, frontend, and deployments scripts in a single repo.
 - [ ] Flesh out the proof-of-concept spec.

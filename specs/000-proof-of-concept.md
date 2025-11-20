@@ -17,26 +17,30 @@ The very basic web server to prove that we can successfully pull data from the A
   - [ ] Aptora Extensions database port
   - [ ] Aptora Extensions database username
   - [ ] Aptora Extensions database password
+- [ ] Add backend getting started info to CONTRIBUTING.md
 
 ### Frontend Creation
 
 - [ ] Set up React project following best practices
 - [ ] Set up frontend jobs in CI GitHub workflow
-- [ ] Set up backend to automatically serve frontend as static assets
+- [ ] Set up backend to serve frontend using Go's `embed` package
+  - [ ] Production: embed React build into Go binary
+  - [ ] Development: `--dev-mode` flag to serve from disk with hot-reload
+- [ ] Add frontend getting started info to CONTRIBUTING.md
 
 ### Build Set Up
 
 - [ ] Create build script with a justfile
-  - [ ] Build frontend
-  - [ ] Build backend
-  - [ ] Tar build output for deployment to remote Ubuntu server
+  - [ ] Build frontend (React production build)
+  - [ ] Build backend (embed frontend assets into Go binary)
+  - [ ] Output: single executable binary for deployment
 
 ### Deployment Script
 
 - [ ] Create systemd service file for running the backend
 - [ ] Create deployment script
   - [ ] Stop systemd service on the remote server (if it exists)
-  - [ ] scp built files to remote server
+  - [ ] scp single binary executable to remote server
   - [ ] scp config file to remote server
   - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
   - [ ] Start systemd service
