@@ -13,13 +13,15 @@ If the user input is empty or invalid, use the previously entered spec number fr
 
 Required behavior (non-interactive flow)
 
+**CRITICAL**: This is the IMPLEMENTATION PHASE - all code changes happen here after `/start-pr` approval.
+
 1. Read the spec for the given number in `specs/` and determine the next incomplete section from the Task List.
 2. For each task in the incomplete section:
    - Implement the task.
    - Run the relevant automated tests immediately after implementing the change. Tests must be run and pass before committing.
      - If a change only affects unit tests, run the narrower set of packages to save time.
    - If tests fail, refine the code until tests pass. Do not proceed to committing that TODO item until its tests pass.
-   - Once tests pass, update the spec (check off corresponding item) and commit the change locally using a descriptive conventional commit message (example `feat(7): add backup script`).
+   - Once tests pass, update the spec (check off corresponding item) and commit the change locally using a descriptive conventional commit message (example `feat: add backup script`).
      - Use: `git add -A && git commit -m "<scope>: <short description>"`
 3. After all task items for the current section are completed and committed locally:
    - Push the branch to the remote:

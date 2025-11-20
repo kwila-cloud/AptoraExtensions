@@ -58,26 +58,31 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Backend Creation
 
-- [ ] Set up Go project following best practices
-  - [ ] Use `slog` for structured logging
-- [ ] Set up backend CI jobs in GitHub workflow
-  - [ ] `go vet` (Go static analysis)
-  - [ ] `go fmt` check (format verification)
-  - [ ] Unit tests with `go test`
-- [ ] Set up environment variable configuration
-  - [ ] Use `godotenv` package for loading `.env` in dev mode
-  - [ ] Read environment variables with `os.Getenv()`
-  - [ ] Required variables (both databases on same SQL Server instance):
-    - [ ] `DB_HOST`, `DB_PORT` (shared by both databases)
-    - [ ] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
-    - [ ] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
-- [ ] Create `.env.example` file with all required variables
-- [ ] Add `.env` to `.gitignore`
-- [ ] Add backend getting started info to CONTRIBUTING.md
+- [x] Set up Go project following best practices
+  - [x] Structure modules with `cmd/server` entrypoint and `internal/...` packages
+  - [x] Use `slog` for structured logging
+- [x] Set up backend CI jobs in GitHub workflow (GitHub-hosted `ubuntu-latest` runners)
+  - [x] `go vet` (Go static analysis)
+  - [x] `go fmt` check (format verification)
+  - [x] Unit tests with `go test`
+- [x] Set up environment variable configuration (use real Aptora dev server per `docs/dev-server.md`)
+  - [x] Use `godotenv` package for loading `.env` in dev mode
+  - [x] Read environment variables with `os.Getenv()`
+  - [x] Required variables (both databases on same SQL Server instance):
+    - [x] `DB_HOST`, `DB_PORT` (shared by both databases)
+    - [x] `APTORA_DB_NAME`, `APTORA_DB_USER`, `APTORA_DB_PASSWORD` (read-only)
+    - [x] `EXTENSIONS_DB_NAME`, `EXTENSIONS_DB_USER`, `EXTENSIONS_DB_PASSWORD` (read-write)
+- [x] Create `.env.example` file with all required variables
+- [x] Add `.env` to `.gitignore`
+- [x] Add backend getting started info to CONTRIBUTING.md
 
 ### Frontend Creation
 
-- [ ] Set up React project following best practices
+- [ ] Set up React 18+ project with TypeScript and Vite
+  - [ ] Use Vite for build tooling (faster dev server, as mentioned in spec)
+  - [ ] Configure TypeScript for type safety
+  - [ ] No testing framework for POC (focus on functionality first)
+- [ ] Add React Router v7 for client-side routing
 - [ ] Set up frontend CI jobs in GitHub workflow
   - [ ] ESLint (linting)
   - [ ] Prettier check (format verification)

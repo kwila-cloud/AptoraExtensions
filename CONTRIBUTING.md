@@ -6,7 +6,14 @@ Refer to the [architecture document](/ARCHITECTURE.md)
 
 ## Getting Started
 
-TODO: add info for setting up a dev environment 
+### Backend Setup
+
+1. Copy `.env.example` to `.env` and fill in your database credentials
+2. Run the backend server:
+   ```bash
+   cd backend
+   go run ./cmd/server
+   ```
 
 ### Common Commands
 

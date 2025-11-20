@@ -3,6 +3,8 @@ description: Start a new pull request by checking specs and creating the appropr
 agent: build
 ---
 
+**CRITICAL**: This is a PLANNING PHASE only - DO NOT implement any code changes.
+
 Automates the process of starting work on a new pull request.
 
 The user gave the input: "$ARGUMENTS"
@@ -24,4 +26,4 @@ Required behavior and confirmation flow
    - Clearly letter the options for each question.
 5. Update the Task List section with any new updates based on your research and the user's answers.
 6. Explain the current Task List section to the user.
-7. When the Task List section is approved by the user, instruct the user to run `/do-pr` to begin implementing the changes. Do not use the word “proceed” as the final prompt — always reference `/do-pr`.
+7. When the Task List section is approved by the user, instruct the user to run `/do-pr` to begin implementing the changes. Do not use the word "proceed" as the final prompt — always reference `/do-pr`.
