@@ -35,15 +35,12 @@ ALTER ROLE db_datareader ADD MEMBER aptora_extensions_readonly;
 #### 2. Create Read-Write User for Extensions Database
 
 ```sql
--- Create read-write login
-CREATE LOGIN aptora_extensions WITH PASSWORD = 'your_secure_password';
+-- Create Extensions database (skip if it already exists)
+CREATE DATABASE AptoraExtensions;
 GO
 
--- Create Extensions database if it doesn't exist
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AptoraExtensions')
-BEGIN
-    CREATE DATABASE AptoraExtensions;
-END
+-- Create read-write login
+CREATE LOGIN aptora_extensions WITH PASSWORD = 'your_secure_password';
 GO
 
 -- Switch to Extensions database
@@ -60,6 +57,8 @@ ALTER ROLE db_datawriter ADD MEMBER aptora_extensions;
 ALTER ROLE db_ddladmin ADD MEMBER aptora_extensions;
 GO
 ```
+
+**Note**: If the `AptoraExtensions` database already exists, you'll get an error on the first line - just ignore it and continue with the rest of the commands.
 
 ### Development
 
