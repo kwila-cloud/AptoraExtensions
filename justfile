@@ -41,3 +41,7 @@ deploy HOST: build-backend
 # Rollback to previous deployment
 rollback HOST:
     ./deploy/rollback.sh {{HOST}}
+
+# Follow service logs on production server
+logs HOST:
+    ssh {{HOST}} sudo journalctl -u aptora-extensions -f
