@@ -5,7 +5,8 @@ Information for setting up the production server.
 ## Create VM
 
 - Create an Ubuntu LTS VM on your host (Hyper-V, ProxMox, etc.)
-  - ISOs are available here: https://ubuntu.com/download/server
+  - ISOs are available [here](https://ubuntu.com/download/server)
+  - For ProxMox, you can use this [helper script](https://community-scripts.github.io/ProxmoxVE/scripts?id=ubuntu2404-vm)
 
 ## Remote access
 
