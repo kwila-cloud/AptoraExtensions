@@ -43,14 +43,29 @@ func NewServer(logger *slog.Logger, devMode bool, db *database.Manager) *Server 
 }
 
 func (s *Server) registerRoutes() {
+	// API routes
 	s.router.Get("/health", s.handleHealth)
-	s.router.Get("/api/employees", s.handleEmployees)
-	s.router.Get("/api/invoices", s.handleInvoices)
+	s.router.Route("/api", func(r chi.Router) {
+		r.Get("/employees", s.handleEmployees)
+		r.Get("/invoices", s.handleInvoices)
+		// Catch-all for unmatched API routes - return 404
+		r.NotFound(s.handleAPINotFound)
+	})
 
+	// Frontend routes (SPA catch-all)
 	if s.devMode {
 		s.router.HandleFunc("/*", s.proxyToVite)
 	} else {
 		s.router.HandleFunc("/*", s.serveAssets)
+	}
+}
+
+func (s *Server) handleAPINotFound(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+	resp := map[string]string{"error": "API endpoint not found"}
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.logger.Error("failed to encode error response", slog.Any("error", err))
 	}
 }
 
