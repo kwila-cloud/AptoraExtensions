@@ -74,11 +74,11 @@ func (m *Manager) tryConnect(cfg Config) {
 	m.logger.Info("attempting to connect to databases")
 
 	aptoraConnStr := fmt.Sprintf(
-		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=disable;ApplicationIntent=ReadOnly",
+		"server=%s;port=%s;database=%s;user id=%s;password=%s;ApplicationIntent=ReadOnly",
 		cfg.Host, cfg.Port, cfg.AptoraDBName, cfg.AptoraDBUser, cfg.AptoraDBPassword,
 	)
 	extensionsConnStr := fmt.Sprintf(
-		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=disable",
+		"server=%s;port=%s;database=%s;user id=%s;password=%s",
 		cfg.Host, cfg.Port, cfg.ExtensionsDBName, cfg.ExtensionsDBUser, cfg.ExtensionsDBPassword,
 	)
 
