@@ -132,10 +132,12 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - [ ] Remove current unnecessary CSS
 - [ ] Set up TanStack Table
 - [ ] Create a single React page that fetches invoices from last month
-  - [ ] Display all invoice fields returned from DB (refine later)
+  - [ ] Add input for start date
+  - [ ] Add input for end date
+  - [ ] Display all invoice fields returned from API
   - [ ] Use TanStack Table for spreadsheet-like display
   - [ ] Implement sorting functionality
-  - [ ] Implement filtering by employee
+  - [ ] Implement employee selector
   - [ ] Keep UI minimal but polished (align with Low Friction principle)
 
 ### Deployment Script
