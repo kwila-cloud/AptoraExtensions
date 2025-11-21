@@ -195,8 +195,10 @@ func (m *Manager) verifyReadOnly(db *sql.DB) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Try to create a temporary table - this should fail on read-only connection
-	testSQL := `CREATE TABLE #read_only_test (id INT)`
+	// Try to create a permanent table - this should fail on read-only connection.
+	// NOTE: We must use a permanent table (not #temp) because SQL Server allows
+	// all users to create temp tables in tempdb regardless of permissions.
+	testSQL := `CREATE TABLE aptora_extensions_readonly_test (id INT)`
 	_, err := db.ExecContext(ctx, testSQL)
 
 	if err != nil {
@@ -205,9 +207,8 @@ func (m *Manager) verifyReadOnly(db *sql.DB) error {
 		return nil
 	}
 
-	// Bad! Write succeeded when it shouldn't have
-	// Clean up the temp table
-	_, _ = db.ExecContext(ctx, `DROP TABLE #read_only_test`)
+	// Bad! Write succeeded when it shouldn't have - clean up and error
+	_, _ = db.ExecContext(ctx, `DROP TABLE aptora_extensions_readonly_test`)
 	return fmt.Errorf("connection is NOT read-only - write operations are allowed")
 }
 
