@@ -12,10 +12,21 @@ build-backend: build-frontend
 
 # Run development mode (frontend dev server + backend proxy)
 dev:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Trap to kill background processes on exit
+    trap 'jobs -p | xargs -r kill' EXIT
+    
     # Start frontend dev server in background
     cd frontend && npm run dev &
-    # Start backend in dev mode
+    VITE_PID=$!
+    
+    # Start backend in dev mode (foreground)
     cd backend && go run ./cmd/server --dev
+    
+    # Wait for background processes (in case backend exits early)
+    wait
 
 # Clean build artifacts
 clean:
