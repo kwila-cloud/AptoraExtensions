@@ -117,7 +117,7 @@ func (m *Manager) tryConnect(cfg Config) {
 	}
 
 	// Initialize schema and health check
-	if err := m.initializeSchema(extensionsDB); err != nil {
+	if err := m.initializeSchema(extensionsDB, cfg.ExtensionsDBName); err != nil {
 		aptoraDB.Close()
 		extensionsDB.Close()
 		m.setUnhealthy(fmt.Sprintf("failed to initialize schema: %v", err))
@@ -143,8 +143,22 @@ func (m *Manager) tryConnect(cfg Config) {
 }
 
 // initializeSchema creates the health_check table if it doesn't exist
-// and inserts a test row.
-func (m *Manager) initializeSchema(db *sql.DB) error {
+// and inserts a test row. It verifies the database name to ensure we only
+// run schema initialization on the Extensions database.
+func (m *Manager) initializeSchema(db *sql.DB, expectedDBName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Verify we're connected to the correct database
+	var actualDBName string
+	if err := db.QueryRowContext(ctx, "SELECT DB_NAME()").Scan(&actualDBName); err != nil {
+		return fmt.Errorf("failed to verify database name: %w", err)
+	}
+
+	if actualDBName != expectedDBName {
+		return fmt.Errorf("safety check failed: expected database %q but connected to %q - refusing to initialize schema", expectedDBName, actualDBName)
+	}
+
 	// Create table if not exists
 	createTableSQL := `
 	IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='health_check' AND xtype='U')
@@ -152,9 +166,6 @@ func (m *Manager) initializeSchema(db *sql.DB) error {
 		id INT IDENTITY(1,1) PRIMARY KEY,
 		timestamp DATETIME2 NOT NULL
 	)`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
 	if _, err := db.ExecContext(ctx, createTableSQL); err != nil {
 		return fmt.Errorf("failed to create health_check table: %w", err)
@@ -165,6 +176,8 @@ func (m *Manager) initializeSchema(db *sql.DB) error {
 	if _, err := db.ExecContext(ctx, insertSQL); err != nil {
 		return fmt.Errorf("failed to insert health check row: %w", err)
 	}
+
+	m.logger.Info("initialized schema on Extensions database", slog.String("database", actualDBName))
 
 	return nil
 }
