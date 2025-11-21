@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,7 +7,7 @@ import {
   flexRender,
   createColumnHelper,
   type SortingState,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 
 interface Employee {
   id: number;
@@ -29,20 +29,20 @@ interface ApiResponse<T> {
 const columnHelper = createColumnHelper<Invoice>();
 
 const columns = [
-  columnHelper.accessor('id', {
-    header: 'ID',
+  columnHelper.accessor("id", {
+    header: "ID",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor('date', {
-    header: 'Date',
+  columnHelper.accessor("date", {
+    header: "Date",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor('employee_name', {
-    header: 'Employee Name',
+  columnHelper.accessor("employee_name", {
+    header: "Employee Name",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor('total', {
-    header: 'Total',
+  columnHelper.accessor("total", {
+    header: "Total",
     cell: (info) => `$${info.getValue().toFixed(2)}`,
   }),
 ];
@@ -53,32 +53,47 @@ function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: false }]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "date", desc: false },
+  ]);
 
   // Calculate previous month dates
   const getPreviousMonthDates = () => {
     const now = new Date();
     const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const startDate = prevMonth.toISOString().split('T')[0];
-    const endDate = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + 1, 0).toISOString().split('T')[0];
+    const startDate = prevMonth.toISOString().split("T")[0];
+    const endDate = new Date(
+      prevMonth.getFullYear(),
+      prevMonth.getMonth() + 1,
+      0,
+    )
+      .toISOString()
+      .split("T")[0];
     return { startDate, endDate };
   };
 
-  const { startDate: defaultStart, endDate: defaultEnd } = getPreviousMonthDates();
+  const { startDate: defaultStart, endDate: defaultEnd } =
+    getPreviousMonthDates();
 
   // Initialize state from URL params or defaults
-  const [startDate, setStartDate] = useState(searchParams.get('start_date') || defaultStart);
-  const [endDate, setEndDate] = useState(searchParams.get('end_date') || defaultEnd);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(searchParams.get('employee_id') || '');
+  const [startDate, setStartDate] = useState(
+    searchParams.get("start_date") || defaultStart,
+  );
+  const [endDate, setEndDate] = useState(
+    searchParams.get("end_date") || defaultEnd,
+  );
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(
+    searchParams.get("employee_id") || "",
+  );
   const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   // Update URL params when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set('start_date', startDate);
-    params.set('end_date', endDate);
+    params.set("start_date", startDate);
+    params.set("end_date", endDate);
     if (selectedEmployeeId) {
-      params.set('employee_id', selectedEmployeeId);
+      params.set("employee_id", selectedEmployeeId);
     }
     setSearchParams(params, { replace: true });
   }, [startDate, endDate, selectedEmployeeId, setSearchParams]);
@@ -89,24 +104,33 @@ function InvoicesPage() {
 
     const fetchEmployees = async () => {
       try {
-        const res = await fetch('/api/employees', { signal: controller.signal });
-        
+        const res = await fetch("/api/employees", {
+          signal: controller.signal,
+        });
+
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ error: 'Failed to fetch employees' }));
-          console.error('Failed to fetch employees:', errorData.error || 'Unknown error');
+          const errorData = await res
+            .json()
+            .catch(() => ({ error: "Failed to fetch employees" }));
+          console.error(
+            "Failed to fetch employees:",
+            errorData.error || "Unknown error",
+          );
           return;
         }
 
         const data: ApiResponse<Employee> = await res.json();
-        
+
         if (data.employees && Array.isArray(data.employees)) {
-          const sorted = [...data.employees].sort((a, b) => a.name.localeCompare(b.name));
+          const sorted = [...data.employees].sort((a, b) =>
+            a.name.localeCompare(b.name),
+          );
           setEmployees(sorted);
         }
       } catch (err) {
         // Ignore AbortError on unmount
-        if (err instanceof Error && err.name !== 'AbortError') {
-          console.error('Failed to fetch employees:', err.message);
+        if (err instanceof Error && err.name !== "AbortError") {
+          console.error("Failed to fetch employees:", err.message);
         }
       }
     };
@@ -128,7 +152,7 @@ function InvoicesPage() {
     });
 
     if (selectedEmployeeId) {
-      params.append('employee_id', selectedEmployeeId);
+      params.append("employee_id", selectedEmployeeId);
     }
 
     try {
@@ -136,13 +160,13 @@ function InvoicesPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Failed to fetch invoices');
+        setError(data.error || "Failed to fetch invoices");
         setInvoices([]);
       } else {
         setInvoices(data.invoices);
       }
     } catch {
-      setError('Network error occurred');
+      setError("Network error occurred");
       setInvoices([]);
     } finally {
       setLoading(false);
@@ -171,7 +195,9 @@ function InvoicesPage() {
   return (
     <div className="h-screen bg-gray-50 p-3 md:p-6 flex flex-col overflow-hidden">
       <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-8 flex-shrink-0">Invoices</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-8 flex-shrink-0">
+          Invoices
+        </h1>
 
         {/* Form Section */}
         <div className="bg-white rounded-lg shadow-sm mb-3 md:mb-6 flex-shrink-0">
@@ -181,57 +207,68 @@ function InvoicesPage() {
             className="md:hidden w-full px-4 py-3 flex items-center justify-between text-left font-medium text-gray-900"
           >
             <span>Filters</span>
-            <span className="text-gray-500">{filtersExpanded ? '▲' : '▼'}</span>
+            <span className="text-gray-500">{filtersExpanded ? "▲" : "▼"}</span>
           </button>
 
           {/* Filters */}
-          <div className={`${filtersExpanded ? 'block' : 'hidden'} md:block p-4 md:p-6`}>
+          <div
+            className={`${filtersExpanded ? "block" : "hidden"} md:block p-4 md:p-6`}
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            <div>
-              <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+              <div>
+                <label
+                  htmlFor="start-date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Start Date
+                </label>
+                <input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="end-date" className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
-              </label>
-              <input
-                id="end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+              <div>
+                <label
+                  htmlFor="end-date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  End Date
+                </label>
+                <input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="employee" className="block text-sm font-medium text-gray-700 mb-1">
-                Employee
-              </label>
-              <select
-                id="employee"
-                value={selectedEmployeeId}
-                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">All Employees</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id.toString()}>
-                    {emp.name}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label
+                  htmlFor="employee"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Employee
+                </label>
+                <select
+                  id="employee"
+                  value={selectedEmployeeId}
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">All Employees</option>
+                  {employees.map((emp) => (
+                    <option key={emp.id} value={emp.id.toString()}>
+                      {emp.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
           </div>
         </div>
 
@@ -253,7 +290,9 @@ function InvoicesPage() {
             {invoices.length > 0 && (
               <div className="px-3 md:px-6 py-2 md:py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
                 <p className="text-xs md:text-sm text-gray-700">
-                  Showing <span className="font-semibold">{invoices.length}</span> invoice{invoices.length !== 1 ? 's' : ''}
+                  Showing{" "}
+                  <span className="font-semibold">{invoices.length}</span>{" "}
+                  invoice{invoices.length !== 1 ? "s" : ""}
                 </p>
               </div>
             )}
@@ -261,7 +300,10 @@ function InvoicesPage() {
               <table className="min-w-full">
                 <thead className="sticky top-0 z-10">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id} className="shadow-[0_2px_0_0_rgba(0,0,0,0.1)]">
+                    <tr
+                      key={headerGroup.id}
+                      className="shadow-[0_2px_0_0_rgba(0,0,0,0.1)]"
+                    >
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
@@ -271,12 +313,15 @@ function InvoicesPage() {
                           <div className="flex items-center gap-1">
                             {header.isPlaceholder
                               ? null
-                              : flexRender(header.column.columnDef.header, header.getContext())}
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext(),
+                                )}
                             <span className="text-gray-400">
                               {{
-                                asc: '▲',
-                                desc: '▼',
-                              }[header.column.getIsSorted() as string] ?? ''}
+                                asc: "▲",
+                                desc: "▼",
+                              }[header.column.getIsSorted() as string] ?? ""}
                             </span>
                           </div>
                         </th>
@@ -287,9 +332,15 @@ function InvoicesPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {table.getRowModel().rows.map((row) => (
                     <tr key={row.id} className="hover:bg-gray-50">
-                       {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
                         </td>
                       ))}
                     </tr>
