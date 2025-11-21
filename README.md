@@ -4,15 +4,67 @@ Aptora Extensions provides a modern web interface for accessing and analyzing da
 
 ## Quick Start
 
+### Prerequisites
+
+Before running the application, you need to set up database credentials:
+
+#### 1. Create Read-Only User for Aptora Database
+
+Connect to your SQL Server instance and run:
+
+```sql
+-- Create read-only login
+CREATE LOGIN aptora_extensions_readonly WITH PASSWORD = 'your_secure_password';
+
+-- Switch to Aptora database
+USE [YourAptoraDatabase];
+
+-- Create user from login
+CREATE USER aptora_extensions_readonly FOR LOGIN aptora_extensions_readonly;
+
+-- Grant read-only access
+ALTER ROLE db_datareader ADD MEMBER aptora_extensions_readonly;
+
+-- Verify read-only access (optional)
+-- This should fail with permission denied:
+-- EXECUTE AS USER = 'aptora_extensions_readonly';
+-- CREATE TABLE test (id INT);
+-- REVERT;
+```
+
+#### 2. Create Read-Write User for Extensions Database
+
+Be sure to run each section of commands separately, otherwise you may get errors about the database "AptoraExtensions" not existing.
+
+```sql
+-- Create Extensions database (skip if it already exists)
+CREATE DATABASE AptoraExtensions;
+
+-- Create read-write login
+CREATE LOGIN aptora_extensions WITH PASSWORD = 'your_secure_password';
+
+-- Switch to Extensions database
+USE AptoraExtensions;
+
+-- Create user from login
+CREATE USER aptora_extensions FOR LOGIN aptora_extensions;
+
+-- Grant read-write access
+ALTER ROLE db_datareader ADD MEMBER aptora_extensions;
+ALTER ROLE db_datawriter ADD MEMBER aptora_extensions;
+ALTER ROLE db_ddladmin ADD MEMBER aptora_extensions;
+```
+
+**Note**: If the `AptoraExtensions` database already exists, you'll get an error on the first line - just ignore it and continue with the rest of the commands.
+
 ### Development
 
 ```bash
-# Copy environment template
+# Copy environment template and edit with your database credentials
 cp .env.example .env
 
-# Edit .env with your database credentials
 # Install frontend dependencies
-cd frontend && npm install
+cd frontend && npm install && cd ..
 
 # Start development servers (Go backend + Vite frontend)
 just dev

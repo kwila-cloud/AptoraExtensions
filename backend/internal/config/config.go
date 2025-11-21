@@ -23,7 +23,14 @@ type Settings struct {
 // Load loads environment variables from the runtime environment. When a local
 // .env file is present (development mode), it is loaded automatically.
 func Load() (Settings, error) {
-	_ = godotenv.Load()
+	// Try to load .env file - check current directory first, then parent directory
+	// (for when running from backend/ subdirectory). If both fail, continue without
+	// .env (production may use actual environment variables).
+	if err := godotenv.Load(".env"); err != nil {
+		if err := godotenv.Load("../.env"); err != nil {
+			// Neither file exists - that's OK, we may be using actual environment variables
+		}
+	}
 
 	missing := []string{}
 	get := func(k string) string {
@@ -46,7 +53,7 @@ func Load() (Settings, error) {
 	}
 
 	if len(missing) > 0 {
-		return Settings{}, fmt.Errorf("missing required env vars: %s", strings.Join(missing, ","))
+		return Settings{}, fmt.Errorf("missing required env vars: %s", strings.Join(missing, ", "))
 	}
 
 	return settings, nil
