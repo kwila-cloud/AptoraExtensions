@@ -42,7 +42,52 @@ func NewServer(logger *slog.Logger, devMode bool, db *database.Manager) *Server 
 	return s
 }
 
+// requestLogger logs each HTTP request with structured logging
+func (s *Server) requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// Wrap the ResponseWriter to capture status code
+		ww := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+
+		// Process request
+		next.ServeHTTP(ww, r)
+
+		// Log request details
+		duration := time.Since(start)
+		s.logger.Info("http request",
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
+			slog.String("remote_addr", r.RemoteAddr),
+			slog.Int("status", ww.statusCode),
+			slog.Int("bytes", ww.bytesWritten),
+			slog.Duration("duration", duration),
+		)
+	})
+}
+
+// responseWriter wraps http.ResponseWriter to capture status code and bytes written
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode   int
+	bytesWritten int
+}
+
+func (rw *responseWriter) WriteHeader(statusCode int) {
+	rw.statusCode = statusCode
+	rw.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	n, err := rw.ResponseWriter.Write(b)
+	rw.bytesWritten += n
+	return n, err
+}
+
 func (s *Server) registerRoutes() {
+	// Add request logging middleware
+	s.router.Use(s.requestLogger)
+
 	// API routes
 	s.router.Get("/health", s.handleHealth)
 	s.router.Route("/api", func(r chi.Router) {
