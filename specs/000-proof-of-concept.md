@@ -101,15 +101,15 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Backend Database Connection
 
 - [x] Add `microsoft/go-mssqldb` dependency to `go.mod`
-- [ ] Create database connection manager in `internal/database/`
-  - [ ] Connection pooling (max 10 connections per database)
-  - [ ] Read-only connection to Aptora database (Employees, Invoices tables)
-  - [ ] Read-write connection to Extensions database
-  - [ ] Retry logic: attempt connection every 30 seconds if initial connection fails
-  - [ ] Server starts even if databases unavailable (reports unhealthy, retries in background)
-- [ ] Create Extensions DB schema initialization
-  - [ ] `health_check` table: `id INT IDENTITY(1,1) PRIMARY KEY`, `timestamp DATETIME2`
-  - [ ] Insert new test row on each successful connection (always insert, never update)
+- [x] Create database connection manager in `internal/database/`
+  - [x] Connection pooling (max 10 connections per database)
+  - [x] Read-only connection to Aptora database (Employees, Invoices tables)
+  - [x] Read-write connection to Extensions database
+  - [x] Retry logic: attempt connection every 30 seconds if initial connection fails
+  - [x] Server starts even if databases unavailable (reports unhealthy, retries in background)
+- [x] Create Extensions DB schema initialization
+  - [x] `health_check` table: `id INT IDENTITY(1,1) PRIMARY KEY`, `timestamp DATETIME2`
+  - [x] Insert new test row on each successful connection (always insert, never update)
 - [ ] Update health check HTTP endpoint (`GET /health`)
   - [ ] Returns `{"status": "healthy"}` (200 OK) if both databases connected
   - [ ] Returns `{"status": "unhealthy", "error": "..."}` (503) if either database unavailable
