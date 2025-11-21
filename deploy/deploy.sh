@@ -14,18 +14,18 @@ echo "Deploying to $HOST..."
 echo "Creating backup of existing deployment..."
 ssh "$HOST" "sudo bash -c '[ -d /opt/aptora-extensions ] && rm -rf /opt/aptora-extensions.backup && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true'"
 
-# Stop service (ignore if not running)
-echo "Stopping service..."
-ssh "$HOST" "sudo systemctl stop aptora-extensions || true"
-
-# Create directory and copy files
+# Copy files to server (while service is still running)
 echo "Copying files to server..."
 ssh "$HOST" "sudo mkdir -p /opt/aptora-extensions"
 scp ./aptora-extensions "$HOST":/tmp/aptora-extensions
 scp ./.env.production "$HOST":/tmp/aptora-extensions.env
 scp ./deploy/aptora-extensions.service "$HOST":/tmp/aptora-extensions.service
 
-# Move files to final location and set permissions
+# Stop service (downtime starts here)
+echo "Stopping service..."
+ssh "$HOST" "sudo systemctl stop aptora-extensions || true"
+
+# Move files to final location and set permissions (atomic swap)
 echo "Installing files and setting permissions..."
 ssh "$HOST" "sudo mv /tmp/aptora-extensions /opt/aptora-extensions/aptora-extensions && \
             sudo mv /tmp/aptora-extensions.env /opt/aptora-extensions/.env && \
@@ -34,7 +34,7 @@ ssh "$HOST" "sudo mv /tmp/aptora-extensions /opt/aptora-extensions/aptora-extens
             sudo chmod 755 /opt/aptora-extensions/aptora-extensions && \
             sudo chmod 600 /opt/aptora-extensions/.env"
 
-# Enable and start service
+# Enable and start service (downtime ends here)
 echo "Enabling and starting service..."
 ssh "$HOST" "sudo systemctl daemon-reload && sudo systemctl enable aptora-extensions && sudo systemctl start aptora-extensions"
 
