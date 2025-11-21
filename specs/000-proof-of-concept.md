@@ -128,15 +128,29 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Simple Frontend
 
-- [ ] Set up Tailwind CSS in React project
-- [ ] Remove current unnecessary CSS
-- [ ] Set up TanStack Table
-- [ ] Create a single React page that fetches invoices from last month
-  - [ ] Display all invoice fields returned from DB (refine later)
-  - [ ] Use TanStack Table for spreadsheet-like display
-  - [ ] Implement sorting functionality
-  - [ ] Implement filtering by employee
-  - [ ] Keep UI minimal but polished (align with Low Friction principle)
+- [x] Set up Tailwind CSS in React project
+  - [x] Install `tailwindcss`, `postcss`, `autoprefixer` packages
+  - [x] Create `tailwind.config.js` and `postcss.config.js`
+  - [x] Add Tailwind directives to CSS entry point
+- [x] Remove current unnecessary CSS (App.css boilerplate styles)
+- [x] Set up TanStack Table
+  - [x] Install `@tanstack/react-table` package
+- [x] Create invoice page component that fetches invoices from previous calendar month
+  - [x] Date inputs default to previous calendar month (e.g., Oct 1 - Oct 31 if current month is November)
+  - [x] Add labeled date input for start date (YYYY-MM-DD format)
+  - [x] Add labeled date input for end date (YYYY-MM-DD format)
+  - [x] Add employee selector dropdown (defaults to "All Employees" - no filter)
+  - [x] Fetch employees from `/api/employees` on component mount
+  - [x] Fetch invoices when form inputs change (with debouncing to avoid excessive requests)
+  - [x] Display loading spinner while fetching data
+  - [x] Display error messages above table if API returns error (e.g., 500+ invoice limit)
+  - [x] Display all invoice fields returned from API (id, date, employee_id, employee_name, total)
+  - [x] Use TanStack Table for spreadsheet-like display with sorting on all columns
+  - [x] Keep UI minimal but polished:
+    - [x] Labels above all inputs (Start Date, End Date, Employee)
+    - [x] Consistent Tailwind form input styling
+    - [x] Visual hierarchy: header with title, form section, table section
+    - [x] Clean table styling with borders and hover states
 
 ### Deployment Script
 
