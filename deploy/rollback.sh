@@ -11,22 +11,22 @@ HOST="$1"
 echo "Rolling back deployment on $HOST..."
 
 # Check if backup exists
-if ! ssh "$HOST" "[ -d /opt/aptora-extensions.backup ]"; then
+if ! ssh "$HOST" "sudo [ -d /opt/aptora-extensions.backup ]"; then
     echo "✗ Error: No backup found at /opt/aptora-extensions.backup"
     exit 1
 fi
 
 # Stop service
 echo "Stopping service..."
-ssh "$HOST" "systemctl stop aptora-extensions"
+ssh "$HOST" "sudo systemctl stop aptora-extensions"
 
 # Restore from backup
 echo "Restoring from backup..."
-ssh "$HOST" "rm -rf /opt/aptora-extensions && mv /opt/aptora-extensions.backup /opt/aptora-extensions"
+ssh "$HOST" "sudo rm -rf /opt/aptora-extensions && sudo mv /opt/aptora-extensions.backup /opt/aptora-extensions"
 
 # Start service
 echo "Starting service..."
-ssh "$HOST" "systemctl start aptora-extensions"
+ssh "$HOST" "sudo systemctl start aptora-extensions"
 
 # Wait and verify
 echo "Waiting for service to start..."

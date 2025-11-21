@@ -12,25 +12,31 @@ echo "Deploying to $HOST..."
 
 # Create backup of existing directory (if it exists)
 echo "Creating backup of existing deployment..."
-ssh "$HOST" "[ -d /opt/aptora-extensions ] && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true"
+ssh "$HOST" "sudo bash -c '[ -d /opt/aptora-extensions ] && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true'"
 
 # Stop service (ignore if not running)
 echo "Stopping service..."
-ssh "$HOST" "systemctl stop aptora-extensions || true"
+ssh "$HOST" "sudo systemctl stop aptora-extensions || true"
 
-# Copy files
+# Create directory and copy files
 echo "Copying files to server..."
-scp ./aptora-extensions "$HOST":/opt/aptora-extensions/
-scp ./.env.production "$HOST":/opt/aptora-extensions/.env
-scp ./deploy/aptora-extensions.service "$HOST":/etc/systemd/system/
+ssh "$HOST" "sudo mkdir -p /opt/aptora-extensions"
+scp ./aptora-extensions "$HOST":/tmp/aptora-extensions
+scp ./.env.production "$HOST":/tmp/aptora-extensions.env
+scp ./deploy/aptora-extensions.service "$HOST":/tmp/aptora-extensions.service
 
-# Set permissions
-echo "Setting permissions..."
-ssh "$HOST" "chown root:root /opt/aptora-extensions/aptora-extensions /opt/aptora-extensions/.env && chmod 755 /opt/aptora-extensions/aptora-extensions && chmod 600 /opt/aptora-extensions/.env"
+# Move files to final location and set permissions
+echo "Installing files and setting permissions..."
+ssh "$HOST" "sudo mv /tmp/aptora-extensions /opt/aptora-extensions/aptora-extensions && \
+            sudo mv /tmp/aptora-extensions.env /opt/aptora-extensions/.env && \
+            sudo mv /tmp/aptora-extensions.service /etc/systemd/system/aptora-extensions.service && \
+            sudo chown root:root /opt/aptora-extensions/aptora-extensions /opt/aptora-extensions/.env && \
+            sudo chmod 755 /opt/aptora-extensions/aptora-extensions && \
+            sudo chmod 600 /opt/aptora-extensions/.env"
 
 # Enable and start service
 echo "Enabling and starting service..."
-ssh "$HOST" "systemctl daemon-reload && systemctl enable aptora-extensions && systemctl start aptora-extensions"
+ssh "$HOST" "sudo systemctl daemon-reload && sudo systemctl enable aptora-extensions && sudo systemctl start aptora-extensions"
 
 # Wait and verify
 echo "Waiting for service to start..."

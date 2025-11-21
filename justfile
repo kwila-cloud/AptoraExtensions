@@ -1,15 +1,5 @@
 #!/usr/bin/env just --justfile
 
-# Build the frontend and copy to backend assets
-build-frontend:
-    cd frontend && npm ci && npm run build
-    mkdir -p backend/internal/server/built-frontend
-    cp -r frontend/dist/* backend/internal/server/built-frontend/
-
-# Build the backend (embed frontend assets)
-build-backend: build-frontend
-    cd backend && go build -o ../aptora-extensions ./cmd/server
-
 # Run development mode (frontend dev server + backend proxy)
 dev:
     #!/usr/bin/env bash
@@ -27,6 +17,16 @@ dev:
     
     # Wait for background processes (in case backend exits early)
     wait
+
+# Build the frontend and copy to backend assets
+build-frontend:
+    cd frontend && npm ci && npm run build
+    mkdir -p backend/internal/server/built-frontend
+    cp -r frontend/dist/* backend/internal/server/built-frontend/
+
+# Build the backend (embed frontend assets)
+build-backend: build-frontend
+    cd backend && go build -o ../aptora-extensions ./cmd/server
 
 # Clean build artifacts
 clean:
