@@ -124,11 +124,11 @@ func (m *Manager) tryConnect(cfg Config) {
 		return
 	}
 
-	// Initialize schema and health check
-	if err := m.initializeSchema(extensionsDB, cfg.ExtensionsDBName); err != nil {
+	// Initialize Extensions database schema and health check
+	if err := m.initializeExtensionsSchema(extensionsDB, cfg.ExtensionsDBName); err != nil {
 		aptoraDB.Close()
 		extensionsDB.Close()
-		m.setUnhealthy(fmt.Sprintf("failed to initialize schema: %v", err))
+		m.setUnhealthy(fmt.Sprintf("failed to initialize Extensions schema: %v", err))
 		return
 	}
 
@@ -150,24 +150,24 @@ func (m *Manager) tryConnect(cfg Config) {
 	m.logger.Info("successfully connected to databases")
 }
 
-// initializeSchema creates the health_check table if it doesn't exist
+// initializeExtensionsSchema creates the health_check table if it doesn't exist
 // and inserts a test row. It verifies the database name to ensure we only
-// run schema initialization on the Extensions database.
-func (m *Manager) initializeSchema(db *sql.DB, expectedDBName string) error {
+// run schema initialization on the Extensions database (never on Aptora).
+func (m *Manager) initializeExtensionsSchema(db *sql.DB, expectedDBName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Verify we're connected to the correct database
+	// Verify we're connected to the Extensions database
 	var actualDBName string
 	if err := db.QueryRowContext(ctx, "SELECT DB_NAME()").Scan(&actualDBName); err != nil {
 		return fmt.Errorf("failed to verify database name: %w", err)
 	}
 
 	if actualDBName != expectedDBName {
-		return fmt.Errorf("safety check failed: expected database %q but connected to %q - refusing to initialize schema", expectedDBName, actualDBName)
+		return fmt.Errorf("safety check failed: expected Extensions database %q but connected to %q - refusing to initialize schema", expectedDBName, actualDBName)
 	}
 
-	// Create table if not exists
+	// Create health_check table if not exists
 	createTableSQL := `
 	IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='health_check' AND xtype='U')
 	CREATE TABLE health_check (
@@ -185,7 +185,7 @@ func (m *Manager) initializeSchema(db *sql.DB, expectedDBName string) error {
 		return fmt.Errorf("failed to insert health check row: %w", err)
 	}
 
-	m.logger.Info("initialized schema on Extensions database", slog.String("database", actualDBName))
+	m.logger.Info("initialized Extensions database schema", slog.String("database", actualDBName))
 
 	return nil
 }
