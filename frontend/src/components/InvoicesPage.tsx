@@ -85,13 +85,37 @@ function InvoicesPage() {
 
   // Fetch employees on mount and sort alphabetically
   useEffect(() => {
-    fetch('/api/employees')
-      .then((res) => res.json())
-      .then((data: ApiResponse<Employee>) => {
-        const sorted = [...data.employees].sort((a, b) => a.name.localeCompare(b.name));
-        setEmployees(sorted);
-      })
-      .catch((err) => console.error('Failed to fetch employees:', err));
+    const controller = new AbortController();
+
+    const fetchEmployees = async () => {
+      try {
+        const res = await fetch('/api/employees', { signal: controller.signal });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: 'Failed to fetch employees' }));
+          console.error('Failed to fetch employees:', errorData.error || 'Unknown error');
+          return;
+        }
+
+        const data: ApiResponse<Employee> = await res.json();
+        
+        if (data.employees && Array.isArray(data.employees)) {
+          const sorted = [...data.employees].sort((a, b) => a.name.localeCompare(b.name));
+          setEmployees(sorted);
+        }
+      } catch (err) {
+        // Ignore AbortError on unmount
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Failed to fetch employees:', err.message);
+        }
+      }
+    };
+
+    fetchEmployees();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const fetchInvoices = useCallback(async () => {
