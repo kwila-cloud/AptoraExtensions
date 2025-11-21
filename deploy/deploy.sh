@@ -10,9 +10,9 @@ fi
 HOST="$1"
 echo "Deploying to $HOST..."
 
-# Create backup of existing binary (if exists)
-echo "Creating backup of existing binary..."
-ssh "$HOST" "mkdir -p /opt/aptora-extensions && [ -f /opt/aptora-extensions/aptora-extensions ] && cp /opt/aptora-extensions/aptora-extensions /opt/aptora-extensions/aptora-extensions.backup || true"
+# Create backup of existing directory (if it exists)
+echo "Creating backup of existing deployment..."
+ssh "$HOST" "[ -d /opt/aptora-extensions ] && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true"
 
 # Stop service (ignore if not running)
 echo "Stopping service..."
@@ -40,10 +40,10 @@ echo "Verifying deployment..."
 if ssh "$HOST" "systemctl is-active aptora-extensions && curl -f http://localhost/health"; then
     echo "✓ Deployment successful!"
     echo "View logs: ssh $HOST journalctl -u aptora-extensions -f"
-    echo "Rollback command (if needed): ssh $HOST 'systemctl stop aptora-extensions && [ -f /opt/aptora-extensions/aptora-extensions.backup ] && cp /opt/aptora-extensions/aptora-extensions.backup /opt/aptora-extensions/aptora-extensions && systemctl start aptora-extensions'"
+    echo "Rollback (if needed): just rollback $HOST"
 else
     echo "✗ Deployment failed - service is not healthy"
     echo "Check logs: ssh $HOST journalctl -u aptora-extensions -n 50"
-    echo "Rollback command: ssh $HOST 'systemctl stop aptora-extensions && [ -f /opt/aptora-extensions/aptora-extensions.backup ] && cp /opt/aptora-extensions/aptora-extensions.backup /opt/aptora-extensions/aptora-extensions && systemctl start aptora-extensions'"
+    echo "Rollback: just rollback $HOST"
     exit 1
 fi

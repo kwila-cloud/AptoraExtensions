@@ -37,3 +37,7 @@ clean:
 # Deploy to production server
 deploy HOST: build-backend
     ./deploy/deploy.sh {{HOST}}
+
+# Rollback to previous deployment
+rollback HOST:
+    ./deploy/rollback.sh {{HOST}}

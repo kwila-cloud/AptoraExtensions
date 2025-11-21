@@ -166,7 +166,7 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [x] Usage: `just deploy <hostname>`
 - [x] Create deployment script in `deploy/deploy.sh`
   - [x] Take hostname as command line argument
-  - [x] Create backup of existing binary on remote server before deployment
+  - [x] Create backup of entire directory on remote server before deployment
   - [x] Stop systemd service on the remote server (if it exists)
   - [x] scp single binary executable to `/opt/aptora-extensions/`
   - [x] scp `.env.production` to remote server as `.env`
@@ -175,5 +175,12 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [x] Start systemd service and wait 5 seconds for startup
   - [x] Verify deployment: check `systemctl is-active` and health endpoint
   - [x] Provide rollback instructions if health check fails
+- [x] Create rollback script in `deploy/rollback.sh`
+  - [x] Take hostname as command line argument
+  - [x] Verify backup exists before attempting rollback
+  - [x] Stop service, restore backup directory, restart service
+  - [x] Verify rollback with health check
+- [x] Add `rollback` recipe to justfile that calls `./deploy/rollback.sh`
+  - [x] Usage: `just rollback <hostname>`
 - [x] Add `.env.production` to `.gitignore` (contains sensitive credentials)
 
