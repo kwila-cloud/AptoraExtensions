@@ -46,7 +46,7 @@ func Load() (Settings, error) {
 	}
 
 	if len(missing) > 0 {
-		return Settings{}, fmt.Errorf("missing required env vars: %s", strings.Join(missing, ","))
+		return Settings{}, fmt.Errorf("missing required env vars: %s", strings.Join(missing, ", "))
 	}
 
 	return settings, nil
