@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   useReactTable,
   getCoreRowModel,
@@ -47,6 +48,7 @@ const columns = [
 ];
 
 function InvoicesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,16 +66,31 @@ function InvoicesPage() {
 
   const { startDate: defaultStart, endDate: defaultEnd } = getPreviousMonthDates();
 
-  const [startDate, setStartDate] = useState(defaultStart);
-  const [endDate, setEndDate] = useState(defaultEnd);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+  // Initialize state from URL params or defaults
+  const [startDate, setStartDate] = useState(searchParams.get('start_date') || defaultStart);
+  const [endDate, setEndDate] = useState(searchParams.get('end_date') || defaultEnd);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(searchParams.get('employee_id') || '');
   const [filtersExpanded, setFiltersExpanded] = useState(true);
 
-  // Fetch employees on mount
+  // Update URL params when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set('start_date', startDate);
+    params.set('end_date', endDate);
+    if (selectedEmployeeId) {
+      params.set('employee_id', selectedEmployeeId);
+    }
+    setSearchParams(params, { replace: true });
+  }, [startDate, endDate, selectedEmployeeId, setSearchParams]);
+
+  // Fetch employees on mount and sort alphabetically
   useEffect(() => {
     fetch('/api/employees')
       .then((res) => res.json())
-      .then((data: ApiResponse<Employee>) => setEmployees(data.employees))
+      .then((data: ApiResponse<Employee>) => {
+        const sorted = [...data.employees].sort((a, b) => a.name.localeCompare(b.name));
+        setEmployees(sorted);
+      })
       .catch((err) => console.error('Failed to fetch employees:', err));
   }, []);
 
