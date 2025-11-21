@@ -59,18 +59,8 @@ ALTER ROLE db_ddladmin ADD MEMBER aptora_extensions;
 ### Development
 
 ```bash
-# Copy environment template
+# Copy environment template and edit with your database credentials
 cp .env.example .env
-
-# Edit .env with your database credentials:
-# - DB_HOST: Your SQL Server hostname/IP
-# - DB_PORT: 1433 (default SQL Server port)
-# - APTORA_DB_NAME: Your Aptora database name
-# - APTORA_DB_USER: aptora_readonly
-# - APTORA_DB_PASSWORD: Password for aptora_readonly user
-# - EXTENSIONS_DB_NAME: AptoraExtensions
-# - EXTENSIONS_DB_USER: aptora_extensions
-# - EXTENSIONS_DB_PASSWORD: Password for aptora_extensions user
 
 # Install frontend dependencies
 cd frontend && npm install && cd ..
