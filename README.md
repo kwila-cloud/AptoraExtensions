@@ -4,15 +4,76 @@ Aptora Extensions provides a modern web interface for accessing and analyzing da
 
 ## Quick Start
 
+### Prerequisites
+
+Before running the application, you need to set up database credentials:
+
+#### 1. Create Read-Only User for Aptora Database
+
+Connect to your SQL Server instance and run:
+
+```sql
+-- Create read-only login
+CREATE LOGIN aptora_readonly WITH PASSWORD = 'your_secure_password';
+
+-- Switch to Aptora database
+USE [YourAptoraDatabase];
+
+-- Create user from login
+CREATE USER aptora_readonly FOR LOGIN aptora_readonly;
+
+-- Grant read-only access
+ALTER ROLE db_datareader ADD MEMBER aptora_readonly;
+
+-- Verify read-only access (optional)
+-- This should fail with permission denied:
+-- EXECUTE AS USER = 'aptora_readonly';
+-- CREATE TABLE test (id INT);
+-- REVERT;
+```
+
+#### 2. Create Read-Write User for Extensions Database
+
+```sql
+-- Create read-write login
+CREATE LOGIN aptora_extensions WITH PASSWORD = 'your_secure_password';
+
+-- Create Extensions database if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AptoraExtensions')
+BEGIN
+    CREATE DATABASE AptoraExtensions;
+END
+
+-- Switch to Extensions database
+USE AptoraExtensions;
+
+-- Create user from login
+CREATE USER aptora_extensions FOR LOGIN aptora_extensions;
+
+-- Grant read-write access
+ALTER ROLE db_datareader ADD MEMBER aptora_extensions;
+ALTER ROLE db_datawriter ADD MEMBER aptora_extensions;
+ALTER ROLE db_ddladmin ADD MEMBER aptora_extensions;
+```
+
 ### Development
 
 ```bash
 # Copy environment template
 cp .env.example .env
 
-# Edit .env with your database credentials
+# Edit .env with your database credentials:
+# - DB_HOST: Your SQL Server hostname/IP
+# - DB_PORT: 1433 (default SQL Server port)
+# - APTORA_DB_NAME: Your Aptora database name
+# - APTORA_DB_USER: aptora_readonly
+# - APTORA_DB_PASSWORD: Password for aptora_readonly user
+# - EXTENSIONS_DB_NAME: AptoraExtensions
+# - EXTENSIONS_DB_USER: aptora_extensions
+# - EXTENSIONS_DB_PASSWORD: Password for aptora_extensions user
+
 # Install frontend dependencies
-cd frontend && npm install
+cd frontend && npm install && cd ..
 
 # Start development servers (Go backend + Vite frontend)
 just dev
