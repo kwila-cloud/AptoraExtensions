@@ -73,8 +73,9 @@ func (m *Manager) connectLoop(cfg Config) {
 func (m *Manager) tryConnect(cfg Config) {
 	m.logger.Info("attempting to connect to databases")
 
+	// Aptora connection with read-only enforcement
 	aptoraConnStr := fmt.Sprintf(
-		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=disable",
+		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=disable;ApplicationIntent=ReadOnly",
 		cfg.Host, cfg.Port, cfg.AptoraDBName, cfg.AptoraDBUser, cfg.AptoraDBPassword,
 	)
 	extensionsConnStr := fmt.Sprintf(
@@ -95,6 +96,13 @@ func (m *Manager) tryConnect(cfg Config) {
 	if err := aptoraDB.Ping(); err != nil {
 		aptoraDB.Close()
 		m.setUnhealthy(fmt.Sprintf("failed to ping Aptora database: %v", err))
+		return
+	}
+
+	// Additional safety: verify read-only mode on Aptora connection
+	if err := m.verifyReadOnly(aptoraDB); err != nil {
+		aptoraDB.Close()
+		m.setUnhealthy(fmt.Sprintf("failed to verify read-only mode for Aptora database: %v", err))
 		return
 	}
 
@@ -180,6 +188,28 @@ func (m *Manager) initializeSchema(db *sql.DB, expectedDBName string) error {
 	m.logger.Info("initialized schema on Extensions database", slog.String("database", actualDBName))
 
 	return nil
+}
+
+// verifyReadOnly attempts to perform a write operation to verify the connection
+// is truly read-only. This provides defense-in-depth protection.
+func (m *Manager) verifyReadOnly(db *sql.DB) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Try to create a temporary table - this should fail on read-only connection
+	testSQL := `CREATE TABLE #read_only_test (id INT)`
+	_, err := db.ExecContext(ctx, testSQL)
+
+	if err != nil {
+		// Good! Write operation failed, connection is read-only
+		m.logger.Info("verified read-only access to Aptora database")
+		return nil
+	}
+
+	// Bad! Write succeeded when it shouldn't have
+	// Clean up the temp table
+	_, _ = db.ExecContext(ctx, `DROP TABLE #read_only_test`)
+	return fmt.Errorf("connection is NOT read-only - write operations are allowed")
 }
 
 // setUnhealthy marks the manager as unhealthy with an error message.
