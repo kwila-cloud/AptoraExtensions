@@ -157,11 +157,23 @@ The very basic bare-bones web server to prove that we can successfully pull data
 - [ ] Create systemd service file for running the backend
   - [ ] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
   - [ ] Set `WorkingDirectory=/opt/aptora-extensions`
-  - [ ] Configure restart policy and logging
-- [ ] Create deployment script
+  - [ ] Configure restart policy: `on-failure` with auto-restart
+  - [ ] Enable service to start on boot: `WantedBy=multi-user.target`
+  - [ ] Run as root user (required for port 80 on Ubuntu server)
+  - [ ] Set file permissions: binary=755, .env=600, owner=root:root
+- [ ] Add `deploy` recipe to justfile that calls `./deploy/deploy.sh`
+  - [ ] Dependency on `build-backend` recipe
+  - [ ] Usage: `just deploy <hostname>`
+- [ ] Create deployment script in `deploy/deploy.sh`
+  - [ ] Take hostname as command line argument
+  - [ ] Create backup of existing binary on remote server before deployment
   - [ ] Stop systemd service on the remote server (if it exists)
-  - [ ] scp single binary executable to remote server
+  - [ ] scp single binary executable to `/opt/aptora-extensions/`
   - [ ] scp `.env.production` to remote server as `.env`
-  - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
-  - [ ] Start systemd service
+  - [ ] Copy systemd service file to `/etc/systemd/system/`
+  - [ ] Run `systemctl daemon-reload` and `systemctl enable aptora-extensions`
+  - [ ] Start systemd service and wait 5 seconds for startup
+  - [ ] Verify deployment: check `systemctl is-active` and health endpoint
+  - [ ] Provide rollback instructions if health check fails
+- [ ] Add `.env.production` to `.gitignore` (contains sensitive credentials)
 
