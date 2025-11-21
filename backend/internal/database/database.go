@@ -73,7 +73,6 @@ func (m *Manager) connectLoop(cfg Config) {
 func (m *Manager) tryConnect(cfg Config) {
 	m.logger.Info("attempting to connect to databases")
 
-	// Aptora connection with read-only enforcement
 	aptoraConnStr := fmt.Sprintf(
 		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=disable;ApplicationIntent=ReadOnly",
 		cfg.Host, cfg.Port, cfg.AptoraDBName, cfg.AptoraDBUser, cfg.AptoraDBPassword,
