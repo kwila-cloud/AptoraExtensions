@@ -100,7 +100,7 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Backend Database Connection
 
-- [ ] Add `microsoft/go-mssqldb` dependency to `go.mod`
+- [x] Add `microsoft/go-mssqldb` dependency to `go.mod`
 - [ ] Create database connection manager in `internal/database/`
   - [ ] Connection pooling (max 10 connections per database)
   - [ ] Read-only connection to Aptora database (Employees, Invoices tables)
