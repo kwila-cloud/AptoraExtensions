@@ -200,6 +200,9 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 		args = append(args, employeeID)
 	}
 
+	// Sort by date ascending by default
+	query += " ORDER BY i.Date ASC, i.id ASC"
+
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 

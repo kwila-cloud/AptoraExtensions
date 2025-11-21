@@ -36,10 +36,6 @@ const columns = [
     header: 'Date',
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor('employee_id', {
-    header: 'Employee ID',
-    cell: (info) => info.getValue(),
-  }),
   columnHelper.accessor('employee_name', {
     header: 'Employee Name',
     cell: (info) => info.getValue(),
@@ -55,7 +51,7 @@ function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: false }]);
 
   // Calculate previous month dates
   const getPreviousMonthDates = () => {
@@ -71,6 +67,7 @@ function InvoicesPage() {
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+  const [filtersExpanded, setFiltersExpanded] = useState(true);
 
   // Fetch employees on mount
   useEffect(() => {
@@ -131,13 +128,24 @@ function InvoicesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Invoices</h1>
+    <div className="h-screen bg-gray-50 p-3 md:p-6 flex flex-col overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-8 flex-shrink-0">Invoices</h1>
 
         {/* Form Section */}
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-lg shadow-sm mb-3 md:mb-6 flex-shrink-0">
+          {/* Mobile Toggle Button */}
+          <button
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+            className="md:hidden w-full px-4 py-3 flex items-center justify-between text-left font-medium text-gray-900"
+          >
+            <span>Filters</span>
+            <span className="text-gray-500">{filtersExpanded ? '▲' : '▼'}</span>
+          </button>
+
+          {/* Filters */}
+          <div className={`${filtersExpanded ? 'block' : 'hidden'} md:block p-4 md:p-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
             <div>
               <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-1">
                 Start Date
@@ -183,40 +191,53 @@ function InvoicesPage() {
               </select>
             </div>
           </div>
+          </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded mb-3 md:mb-6 flex-shrink-0 text-sm">
             {error}
           </div>
         )}
 
         {/* Loading or Table */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
+          <div className="flex justify-center items-center py-12 flex-1">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+            {/* Invoice Count */}
+            {invoices.length > 0 && (
+              <div className="px-3 md:px-6 py-2 md:py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+                <p className="text-xs md:text-sm text-gray-700">
+                  Showing <span className="font-semibold">{invoices.length}</span> invoice{invoices.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
+            <div className="overflow-auto flex-1">
+              <table className="min-w-full">
+                <thead className="sticky top-0 z-10">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
+                    <tr key={headerGroup.id} className="shadow-[0_2px_0_0_rgba(0,0,0,0.1)]">
                       {headerGroup.headers.map((header) => (
                         <th
                           key={header.id}
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                          className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 bg-gray-50"
                           onClick={header.column.getToggleSortingHandler()}
                         >
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
-                          }[header.column.getIsSorted() as string] ?? null}
+                          <div className="flex items-center gap-1">
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(header.column.columnDef.header, header.getContext())}
+                            <span className="text-gray-400">
+                              {{
+                                asc: '▲',
+                                desc: '▼',
+                              }[header.column.getIsSorted() as string] ?? ''}
+                            </span>
+                          </div>
                         </th>
                       ))}
                     </tr>
@@ -225,8 +246,8 @@ function InvoicesPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {table.getRowModel().rows.map((row) => (
                     <tr key={row.id} className="hover:bg-gray-50">
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                       {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="px-3 md:px-6 py-2 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
@@ -236,7 +257,7 @@ function InvoicesPage() {
               </table>
             </div>
             {invoices.length === 0 && !loading && (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-8 md:py-12 text-sm md:text-base text-gray-500">
                 No invoices found for the selected criteria.
               </div>
             )}
