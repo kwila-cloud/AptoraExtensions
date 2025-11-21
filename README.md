@@ -14,20 +14,20 @@ Connect to your SQL Server instance and run:
 
 ```sql
 -- Create read-only login
-CREATE LOGIN aptora_readonly WITH PASSWORD = 'your_secure_password';
+CREATE LOGIN aptora_extensions_readonly WITH PASSWORD = 'your_secure_password';
 
 -- Switch to Aptora database
 USE [YourAptoraDatabase];
 
 -- Create user from login
-CREATE USER aptora_readonly FOR LOGIN aptora_readonly;
+CREATE USER aptora_extensions_readonly FOR LOGIN aptora_extensions_readonly;
 
 -- Grant read-only access
-ALTER ROLE db_datareader ADD MEMBER aptora_readonly;
+ALTER ROLE db_datareader ADD MEMBER aptora_extensions_readonly;
 
 -- Verify read-only access (optional)
 -- This should fail with permission denied:
--- EXECUTE AS USER = 'aptora_readonly';
+-- EXECUTE AS USER = 'aptora_extensions_readonly';
 -- CREATE TABLE test (id INT);
 -- REVERT;
 ```
@@ -37,23 +37,28 @@ ALTER ROLE db_datareader ADD MEMBER aptora_readonly;
 ```sql
 -- Create read-write login
 CREATE LOGIN aptora_extensions WITH PASSWORD = 'your_secure_password';
+GO
 
 -- Create Extensions database if it doesn't exist
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AptoraExtensions')
 BEGIN
     CREATE DATABASE AptoraExtensions;
 END
+GO
 
 -- Switch to Extensions database
 USE AptoraExtensions;
+GO
 
 -- Create user from login
 CREATE USER aptora_extensions FOR LOGIN aptora_extensions;
+GO
 
 -- Grant read-write access
 ALTER ROLE db_datareader ADD MEMBER aptora_extensions;
 ALTER ROLE db_datawriter ADD MEMBER aptora_extensions;
 ALTER ROLE db_ddladmin ADD MEMBER aptora_extensions;
+GO
 ```
 
 ### Development
