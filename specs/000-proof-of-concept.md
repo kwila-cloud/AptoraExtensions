@@ -129,16 +129,28 @@ The very basic bare-bones web server to prove that we can successfully pull data
 ### Simple Frontend
 
 - [ ] Set up Tailwind CSS in React project
-- [ ] Remove current unnecessary CSS
+  - [ ] Install `tailwindcss`, `postcss`, `autoprefixer` packages
+  - [ ] Create `tailwind.config.js` and `postcss.config.js`
+  - [ ] Add Tailwind directives to CSS entry point
+- [ ] Remove current unnecessary CSS (App.css boilerplate styles)
 - [ ] Set up TanStack Table
-- [ ] Create a single React page that fetches invoices from last month
-  - [ ] Add input for start date
-  - [ ] Add input for end date
-  - [ ] Display all invoice fields returned from API
-  - [ ] Use TanStack Table for spreadsheet-like display
-  - [ ] Implement sorting functionality
-  - [ ] Implement employee selector
-  - [ ] Keep UI minimal but polished (align with Low Friction principle)
+  - [ ] Install `@tanstack/react-table` package
+- [ ] Create invoice page component that fetches invoices from previous calendar month
+  - [ ] Date inputs default to previous calendar month (e.g., Oct 1 - Oct 31 if current month is November)
+  - [ ] Add labeled date input for start date (YYYY-MM-DD format)
+  - [ ] Add labeled date input for end date (YYYY-MM-DD format)
+  - [ ] Add employee selector dropdown (defaults to "All Employees" - no filter)
+  - [ ] Fetch employees from `/api/employees` on component mount
+  - [ ] Fetch invoices when form inputs change (with debouncing to avoid excessive requests)
+  - [ ] Display loading spinner while fetching data
+  - [ ] Display error messages above table if API returns error (e.g., 500+ invoice limit)
+  - [ ] Display all invoice fields returned from API (id, date, employee_id, employee_name, total)
+  - [ ] Use TanStack Table for spreadsheet-like display with sorting on all columns
+  - [ ] Keep UI minimal but polished:
+    - [ ] Labels above all inputs (Start Date, End Date, Employee)
+    - [ ] Consistent Tailwind form input styling
+    - [ ] Visual hierarchy: header with title, form section, table section
+    - [ ] Clean table styling with borders and hover states
 
 ### Deployment Script
 
