@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -92,7 +93,7 @@ func (s *Server) handleEmployees(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	defer cancel()
 
-	rows, err := db.QueryContext(ctx, "SELECT id, Name FROM Employees")
+	rows, err := db.QueryContext(ctx, "SELECT id, Name FROM Employees WHERE DateReleased IS NULL")
 	if err != nil {
 		s.logger.Error("failed to query employees", slog.Any("error", err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -162,8 +163,12 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build query
-	query := "SELECT id, Date, RepID, Total FROM Invoices WHERE Date >= @p1 AND Date <= @p2"
+	// Build query - join with Employees to get employee name
+	query := `
+		SELECT i.id, i.Date, i.RepID, e.Name, i.Total 
+		FROM Invoices i
+		LEFT JOIN Employees e ON i.RepID = e.id
+		WHERE i.Date >= @p1 AND i.Date <= @p2`
 	args := []interface{}{startDate, endDate}
 
 	if employeeIDStr != "" {
@@ -176,7 +181,7 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-		query += " AND RepID = @p3"
+		query += " AND i.RepID = @p3"
 		args = append(args, employeeID)
 	}
 
@@ -184,7 +189,13 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// First, check count to enforce 500 limit
-	countQuery := strings.Replace(query, "SELECT id, Date, RepID, Total", "SELECT COUNT(*)", 1)
+	countQuery := `
+		SELECT COUNT(*) 
+		FROM Invoices i
+		WHERE i.Date >= @p1 AND i.Date <= @p2`
+	if employeeIDStr != "" {
+		countQuery += " AND i.RepID = @p3"
+	}
 	var count int
 	if err := db.QueryRowContext(ctx, countQuery, args...).Scan(&count); err != nil {
 		s.logger.Error("failed to count invoices", slog.Any("error", err))
@@ -219,21 +230,26 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	type Invoice struct {
-		ID    int     `json:"id"`
-		Date  string  `json:"date"`
-		RepID int     `json:"rep_id"`
-		Total float64 `json:"total"`
+		ID           int     `json:"id"`
+		Date         string  `json:"date"`
+		EmployeeID   int     `json:"employee_id"`
+		EmployeeName string  `json:"employee_name"`
+		Total        float64 `json:"total"`
 	}
 
 	invoices := []Invoice{}
 	for rows.Next() {
 		var inv Invoice
 		var date time.Time
-		if err := rows.Scan(&inv.ID, &date, &inv.RepID, &inv.Total); err != nil {
+		var employeeName sql.NullString
+		if err := rows.Scan(&inv.ID, &date, &inv.EmployeeID, &employeeName, &inv.Total); err != nil {
 			s.logger.Error("failed to scan invoice row", slog.Any("error", err))
 			continue
 		}
 		inv.Date = date.Format("2006-01-02")
+		if employeeName.Valid {
+			inv.EmployeeName = employeeName.String
+		}
 		invoices = append(invoices, inv)
 	}
 

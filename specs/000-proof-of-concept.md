@@ -114,15 +114,15 @@ The very basic bare-bones web server to prove that we can successfully pull data
   - [x] Returns `{"status": "healthy"}` (200 OK) if both databases connected
   - [x] Returns `{"status": "unhealthy", "error": "..."}` (503) if either database unavailable
 - [x] Create employees endpoint (`GET /api/employees`)
-  - [x] Query `Employees` table: `id` and `Name` columns
+  - [x] Query `Employees` table: `id` and `Name` columns where `DateReleased IS NULL`
   - [x] Response format: `{"employees": [{"id": 1, "name": "John Doe"}, ...]}`
   - [x] Error format: `{"error": "error message"}`
 - [x] Create invoices endpoint (`GET /api/invoices`)
   - [x] Required query params: `start_date`, `end_date` (YYYY-MM-DD format, inclusive range)
   - [x] Optional query param: `employee_id` (integer)
-  - [x] Query `Invoices` table: `id`, `Date`, `RepID`, `Total` columns
+  - [x] Query `Invoices` table joined with `Employees`: `id`, `Date`, `RepID`, `Name`, `Total`
   - [x] Filter: `Date >= start_date AND Date <= end_date`, optionally filter by `RepID = employee_id`
-  - [x] Response format: `{"invoices": [{"id": 123, "date": "2025-01-15", "rep_id": 5, "total": 1500.00}, ...]}`
+  - [x] Response format: `{"invoices": [{"id": 123, "date": "2025-01-15", "employee_id": 5, "employee_name": "John Doe", "total": 1500.00}, ...]}`
   - [x] Error format: `{"error": "error message"}`
   - [x] Validation: Return error if query would return >500 invoices  (error message should mention using a narrower filter)
 
