@@ -2,6 +2,7 @@ aptora-extensions
 
 # Environment variables
 .env
+.env.production
 
 # Go build artifacts
 *.exe

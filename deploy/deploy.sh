@@ -1,0 +1,55 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Error: Hostname is required"
+    echo "Usage: $0 <hostname>"
+    exit 1
+fi
+
+HOST="$1"
+echo "Deploying to $HOST..."
+
+# Create backup of existing directory (if it exists)
+echo "Creating backup of existing deployment..."
+ssh "$HOST" "sudo bash -c '[ -d /opt/aptora-extensions ] && rm -rf /opt/aptora-extensions.backup && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true'"
+
+# Copy files to server (while service is still running)
+echo "Copying files to server..."
+ssh "$HOST" "sudo mkdir -p /opt/aptora-extensions"
+scp ./aptora-extensions "$HOST":/tmp/aptora-extensions
+scp ./.env.production "$HOST":/tmp/aptora-extensions.env
+scp ./deploy/aptora-extensions.service "$HOST":/tmp/aptora-extensions.service
+
+# Stop service (downtime starts here)
+echo "Stopping service..."
+ssh "$HOST" "sudo systemctl stop aptora-extensions || true"
+
+# Move files to final location and set permissions (atomic swap)
+echo "Installing files and setting permissions..."
+ssh "$HOST" "sudo mv /tmp/aptora-extensions /opt/aptora-extensions/aptora-extensions && \
+            sudo mv /tmp/aptora-extensions.env /opt/aptora-extensions/.env && \
+            sudo mv /tmp/aptora-extensions.service /etc/systemd/system/aptora-extensions.service && \
+            sudo chown root:root /opt/aptora-extensions/aptora-extensions /opt/aptora-extensions/.env && \
+            sudo chmod 755 /opt/aptora-extensions/aptora-extensions && \
+            sudo chmod 600 /opt/aptora-extensions/.env"
+
+# Enable and start service (downtime ends here)
+echo "Enabling and starting service..."
+ssh "$HOST" "sudo systemctl daemon-reload && sudo systemctl enable aptora-extensions && sudo systemctl start aptora-extensions"
+
+# Wait and verify
+echo "Waiting for service to start..."
+sleep 5
+
+echo "Verifying deployment..."
+if ssh "$HOST" "systemctl is-active aptora-extensions && curl -f http://localhost/health"; then
+    echo "✓ Deployment successful!"
+    echo "View logs: ssh $HOST journalctl -u aptora-extensions -f"
+    echo "Rollback (if needed): just rollback $HOST"
+else
+    echo "✗ Deployment failed - service is not healthy"
+    echo "Check logs: ssh $HOST journalctl -u aptora-extensions -n 50"
+    echo "Rollback: just rollback $HOST"
+    exit 1
+fi

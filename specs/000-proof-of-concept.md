@@ -154,14 +154,33 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Deployment Script
 
-- [ ] Create systemd service file for running the backend
-  - [ ] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
-  - [ ] Set `WorkingDirectory=/opt/aptora-extensions`
-  - [ ] Configure restart policy and logging
-- [ ] Create deployment script
-  - [ ] Stop systemd service on the remote server (if it exists)
-  - [ ] scp single binary executable to remote server
-  - [ ] scp `.env.production` to remote server as `.env`
-  - [ ] Create and initialize systemd service on remote server (if it doesn't exist)
-  - [ ] Start systemd service
+- [x] Create systemd service file for running the backend
+  - [x] Use `EnvironmentFile=/opt/aptora-extensions/.env` to load config
+  - [x] Set `WorkingDirectory=/opt/aptora-extensions`
+  - [x] Configure restart policy: `on-failure` with auto-restart
+  - [x] Enable service to start on boot: `WantedBy=multi-user.target`
+  - [x] Run as root user (required for port 80 on Ubuntu server)
+  - [x] Set file permissions: binary=755, .env=600, owner=root:root
+- [x] Add `deploy` recipe to justfile that calls `./deploy/deploy.sh`
+  - [x] Dependency on `build-backend` recipe
+  - [x] Usage: `just deploy <hostname>`
+- [x] Create deployment script in `deploy/deploy.sh`
+  - [x] Take hostname as command line argument
+  - [x] Create backup of entire directory on remote server before deployment
+  - [x] Stop systemd service on the remote server (if it exists)
+  - [x] scp single binary executable to `/opt/aptora-extensions/`
+  - [x] scp `.env.production` to remote server as `.env`
+  - [x] Copy systemd service file to `/etc/systemd/system/`
+  - [x] Run `systemctl daemon-reload` and `systemctl enable aptora-extensions`
+  - [x] Start systemd service and wait 5 seconds for startup
+  - [x] Verify deployment: check `systemctl is-active` and health endpoint
+  - [x] Provide rollback instructions if health check fails
+- [x] Create rollback script in `deploy/rollback.sh`
+  - [x] Take hostname as command line argument
+  - [x] Verify backup exists before attempting rollback
+  - [x] Stop service, restore backup directory, restart service
+  - [x] Verify rollback with health check
+- [x] Add `rollback` recipe to justfile that calls `./deploy/rollback.sh`
+  - [x] Usage: `just rollback <hostname>`
+- [x] Add `.env.production` to `.gitignore` (contains sensitive credentials)
 
