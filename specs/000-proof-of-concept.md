@@ -100,23 +100,31 @@ The very basic bare-bones web server to prove that we can successfully pull data
 
 ### Backend Database Connection
 
-- [ ] Create read-only connection to Aptora database
-- [ ] Create read-write connection to Aptora Extensions database
-- [ ] Create simple health check table in Extensions DB to verify write access
-  - [ ] Table: `health_check` with `id` and `timestamp` columns
-  - [ ] Insert test row on startup to verify connection works
-- [ ] Create health check HTTP endpoint
-  - [ ] `GET /health` returns 200 OK if both database connections are healthy
-  - [ ] Returns 503 Service Unavailable if either database is unreachable
-  - [ ] Include basic status info in response (e.g., database connectivity status)
-- [ ] Create simple endpoint that allows querying employees from the DB
-  - [ ] Only return ID and name
-- [ ] Create simple endpoint that allows querying invoices from the DB
-  - [ ] Parameters:
-    - [ ] Date range (required)
-    - [ ] Employee ID (optional)
-  - [ ] Return all invoice fields from DB (can refine later based on frontend needs)
-  - [ ] Do not allow querying more than 500 invoices in one request
+- [ ] Add `microsoft/go-mssqldb` dependency to `go.mod`
+- [ ] Create database connection manager in `internal/database/`
+  - [ ] Connection pooling (max 10 connections per database)
+  - [ ] Read-only connection to Aptora database (Employees, Invoices tables)
+  - [ ] Read-write connection to Extensions database
+  - [ ] Retry logic: attempt connection every 30 seconds if initial connection fails
+  - [ ] Server starts even if databases unavailable (reports unhealthy, retries in background)
+- [ ] Create Extensions DB schema initialization
+  - [ ] `health_check` table: `id INT IDENTITY(1,1) PRIMARY KEY`, `timestamp DATETIME2`
+  - [ ] Insert new test row on each successful connection (always insert, never update)
+- [ ] Update health check HTTP endpoint (`GET /health`)
+  - [ ] Returns `{"status": "healthy"}` (200 OK) if both databases connected
+  - [ ] Returns `{"status": "unhealthy", "error": "..."}` (503) if either database unavailable
+- [ ] Create employees endpoint (`GET /api/employees`)
+  - [ ] Query `Employees` table: `id` and `Name` columns
+  - [ ] Response format: `{"employees": [{"id": 1, "name": "John Doe"}, ...]}`
+  - [ ] Error format: `{"error": "error message"}`
+- [ ] Create invoices endpoint (`GET /api/invoices`)
+  - [ ] Required query params: `start_date`, `end_date` (YYYY-MM-DD format, inclusive range)
+  - [ ] Optional query param: `employee_id` (integer)
+  - [ ] Query `Invoices` table: `id`, `Date`, `RepID`, `Total` columns
+  - [ ] Filter: `Date >= start_date AND Date <= end_date`, optionally filter by `RepID = employee_id`
+  - [ ] Response format: `{"invoices": [{"id": 123, "date": "2025-01-15", "rep_id": 5, "total": 1500.00}, ...]}`
+  - [ ] Error format: `{"error": "error message"}`
+  - [ ] Validation: Return error if query would return >500 invoices  (error message should mention using a narrower filter)
 
 ### Simple Frontend
 
