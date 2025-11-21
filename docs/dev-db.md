@@ -1,4 +1,4 @@
-# Development Server
+# Development Database
 
 Information for setting up a development SQL server.
 
@@ -72,3 +72,8 @@ WITH
 Refresh the connection list in your DB client.
 
 Verify you can access the restored DB.
+
+
+### Set Up
+
+Follow the instructions in the [README](../README.md) to configure the appropriate users.

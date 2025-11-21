@@ -1,0 +1,18 @@
+[Unit]
+Description=Aptora Extensions Web Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/aptora-extensions
+EnvironmentFile=/opt/aptora-extensions/.env
+ExecStart=/opt/aptora-extensions/aptora-extensions
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

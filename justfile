@@ -33,3 +33,7 @@ clean:
     rm -rf frontend/dist
     rm -rf backend/internal/server/built-frontend
     rm -f aptora-extensions
+
+# Deploy to production server
+deploy HOST: build-backend
+    ./deploy/deploy.sh {{HOST}}
