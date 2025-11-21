@@ -12,7 +12,7 @@ echo "Deploying to $HOST..."
 
 # Create backup of existing directory (if it exists)
 echo "Creating backup of existing deployment..."
-ssh "$HOST" "sudo bash -c '[ -d /opt/aptora-extensions ] && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true'"
+ssh "$HOST" "sudo bash -c '[ -d /opt/aptora-extensions ] && rm -rf /opt/aptora-extensions.backup && cp -r /opt/aptora-extensions /opt/aptora-extensions.backup || true'"
 
 # Stop service (ignore if not running)
 echo "Stopping service..."

@@ -193,10 +193,10 @@ function InvoicesPage() {
   });
 
   return (
-    <div className="h-screen bg-gray-50 p-3 md:p-6 flex flex-col overflow-hidden">
+    <div className="h-screen bg-green-50 p-3 md:p-6 flex flex-col overflow-hidden">
       <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 md:mb-8 flex-shrink-0">
-          Invoices
+          Invoices!!!
         </h1>
 
         {/* Form Section */}
