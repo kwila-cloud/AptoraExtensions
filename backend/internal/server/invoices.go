@@ -39,7 +39,7 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 	query := `
 		SELECT i."Tran No" as Number, i."Tran Date", i."Sales Rep", i."Tran Subtotal"
 		FROM aptCDV_VW_APT_InvSalCredEstList i
-		WHERE i."Tran Date" >= @p1 AND i."Tran Date" <= @p2`
+		WHERE i."Tran Date" >= @p1 AND i."Tran Date" <= @p2 AND i."Tran Type" = 'Invoice'`
 	args := []interface{}{startDate, endDate}
 
 	if employeeStr != "" {
@@ -57,7 +57,7 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 	countQuery := `
 		SELECT COUNT(*) 
 		FROM aptCDV_VW_APT_InvSalCredEstList i
-		WHERE i."Tran Date" >= @p1 AND i."Tran Date" <= @p2`
+		WHERE i."Tran Date" >= @p1 AND i."Tran Date" <= @p2 AND i."Tran Type" = 'Invoice'`
 	if employeeStr != "" {
 		countQuery += ` AND i."Sales Rep" = @p3`
 	}
@@ -105,7 +105,6 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 		// TODO: add is_write_off
 	}
 
-	s.logger.Info("hello!")
 	invoices := []Invoice{}
 	for rows.Next() {
 		var inv Invoice
