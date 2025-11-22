@@ -28,6 +28,7 @@ type Manager struct {
 type Config struct {
 	Host                 string
 	Port                 string
+	Encrypt              string // "disable", "true", or "false" - controls TLS encryption
 	AptoraDBName         string
 	AptoraDBUser         string
 	AptoraDBPassword     string
@@ -74,12 +75,12 @@ func (m *Manager) tryConnect(cfg Config) {
 	m.logger.Info("attempting to connect to databases")
 
 	aptoraConnStr := fmt.Sprintf(
-		"server=%s;port=%s;database=%s;user id=%s;password=%s;ApplicationIntent=ReadOnly",
-		cfg.Host, cfg.Port, cfg.AptoraDBName, cfg.AptoraDBUser, cfg.AptoraDBPassword,
+		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=%s;ApplicationIntent=ReadOnly",
+		cfg.Host, cfg.Port, cfg.AptoraDBName, cfg.AptoraDBUser, cfg.AptoraDBPassword, cfg.Encrypt,
 	)
 	extensionsConnStr := fmt.Sprintf(
-		"server=%s;port=%s;database=%s;user id=%s;password=%s",
-		cfg.Host, cfg.Port, cfg.ExtensionsDBName, cfg.ExtensionsDBUser, cfg.ExtensionsDBPassword,
+		"server=%s;port=%s;database=%s;user id=%s;password=%s;encrypt=%s",
+		cfg.Host, cfg.Port, cfg.ExtensionsDBName, cfg.ExtensionsDBUser, cfg.ExtensionsDBPassword, cfg.Encrypt,
 	)
 
 	aptoraDB, err := sql.Open("sqlserver", aptoraConnStr)

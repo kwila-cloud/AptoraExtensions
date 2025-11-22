@@ -12,6 +12,7 @@ import (
 type Settings struct {
 	DBHost               string
 	DBPort               string
+	DBEncrypt            string // "disable", "true", or "false" - controls TLS encryption for SQL Server
 	AptoraDBName         string
 	AptoraDBUser         string
 	AptoraDBPassword     string
@@ -41,9 +42,19 @@ func Load() (Settings, error) {
 		return v
 	}
 
+	// Optional getter with default value
+	getWithDefault := func(k, defaultVal string) string {
+		v := strings.TrimSpace(os.Getenv(k))
+		if v == "" {
+			return defaultVal
+		}
+		return v
+	}
+
 	settings := Settings{
 		DBHost:               get("DB_HOST"),
 		DBPort:               get("DB_PORT"),
+		DBEncrypt:            getWithDefault("DB_ENCRYPT", "true"),
 		AptoraDBName:         get("APTORA_DB_NAME"),
 		AptoraDBUser:         get("APTORA_DB_USER"),
 		AptoraDBPassword:     get("APTORA_DB_PASSWORD"),
