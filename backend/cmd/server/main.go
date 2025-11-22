@@ -31,6 +31,7 @@ func main() {
 	dbCfg := database.Config{
 		Host:                 cfg.DBHost,
 		Port:                 cfg.DBPort,
+		Encrypt:              cfg.DBEncrypt,
 		AptoraDBName:         cfg.AptoraDBName,
 		AptoraDBUser:         cfg.AptoraDBUser,
 		AptoraDBPassword:     cfg.AptoraDBPassword,
