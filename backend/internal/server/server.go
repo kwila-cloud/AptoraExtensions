@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"database/sql"
+
 	"embed"
 	"encoding/json"
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path"
-	"strconv"
+
 	"strings"
 	"time"
 
@@ -193,142 +193,6 @@ func (s *Server) handleEmployees(w http.ResponseWriter, r *http.Request) {
 	resp := map[string][]Employee{"employees": employees}
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.logger.Error("failed to encode employees response", slog.Any("error", err))
-	}
-}
-
-func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	db := s.db.AptoraDB()
-	if db == nil {
-		w.WriteHeader(http.StatusServiceUnavailable)
-		resp := map[string]string{"error": "database not available"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-
-	// Parse and validate query parameters
-	startDate := r.URL.Query().Get("start_date")
-	endDate := r.URL.Query().Get("end_date")
-	employeeIDStr := r.URL.Query().Get("employee_id")
-
-	if startDate == "" || endDate == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		resp := map[string]string{"error": "start_date and end_date are required (YYYY-MM-DD format)"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-
-	// Build query - join with Employees to get employee name
-	query := `
-		SELECT i.id, i.Date, i.RepID, e.Name, i.Total 
-		FROM Invoices i
-		LEFT JOIN Employees e ON i.RepID = e.id
-		WHERE i.Date >= @p1 AND i.Date <= @p2`
-	args := []interface{}{startDate, endDate}
-
-	if employeeIDStr != "" {
-		employeeID, err := strconv.Atoi(employeeIDStr)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			resp := map[string]string{"error": "employee_id must be a valid integer"}
-			if err := json.NewEncoder(w).Encode(resp); err != nil {
-				s.logger.Error("failed to encode error response", slog.Any("error", err))
-			}
-			return
-		}
-		query += " AND i.RepID = @p3"
-		args = append(args, employeeID)
-	}
-
-	// Sort by date ascending by default
-	query += " ORDER BY i.Date ASC, i.id ASC"
-
-	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	defer cancel()
-
-	// First, check count to enforce 500 limit
-	countQuery := `
-		SELECT COUNT(*) 
-		FROM Invoices i
-		WHERE i.Date >= @p1 AND i.Date <= @p2`
-	if employeeIDStr != "" {
-		countQuery += " AND i.RepID = @p3"
-	}
-	var count int
-	if err := db.QueryRowContext(ctx, countQuery, args...).Scan(&count); err != nil {
-		s.logger.Error("failed to count invoices", slog.Any("error", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		resp := map[string]string{"error": "failed to count invoices"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-
-	if count > 500 {
-		w.WriteHeader(http.StatusBadRequest)
-		resp := map[string]string{"error": "query would return more than 500 invoices, please use a narrower filter"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-
-	// Execute main query
-	rows, err := db.QueryContext(ctx, query, args...)
-	if err != nil {
-		s.logger.Error("failed to query invoices", slog.Any("error", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		resp := map[string]string{"error": "failed to query invoices"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-	defer rows.Close()
-
-	type Invoice struct {
-		ID           int     `json:"id"`
-		Date         string  `json:"date"`
-		EmployeeID   int     `json:"employee_id"`
-		EmployeeName string  `json:"employee_name"`
-		Total        float64 `json:"total"`
-	}
-
-	invoices := []Invoice{}
-	for rows.Next() {
-		var inv Invoice
-		var date time.Time
-		var employeeName sql.NullString
-		if err := rows.Scan(&inv.ID, &date, &inv.EmployeeID, &employeeName, &inv.Total); err != nil {
-			s.logger.Error("failed to scan invoice row", slog.Any("error", err))
-			continue
-		}
-		inv.Date = date.Format("2006-01-02")
-		if employeeName.Valid {
-			inv.EmployeeName = employeeName.String
-		}
-		invoices = append(invoices, inv)
-	}
-
-	if err := rows.Err(); err != nil {
-		s.logger.Error("error iterating invoice rows", slog.Any("error", err))
-		w.WriteHeader(http.StatusInternalServerError)
-		resp := map[string]string{"error": "failed to read invoices"}
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			s.logger.Error("failed to encode error response", slog.Any("error", err))
-		}
-		return
-	}
-
-	resp := map[string][]Invoice{"invoices": invoices}
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.logger.Error("failed to encode invoices response", slog.Any("error", err))
 	}
 }
 

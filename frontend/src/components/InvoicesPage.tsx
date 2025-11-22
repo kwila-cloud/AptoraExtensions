@@ -15,11 +15,10 @@ interface Employee {
 }
 
 interface Invoice {
-  id: number;
+  number: number;
   date: string;
-  employee_id: number;
   employee_name: string;
-  total: number;
+  subtotal: number;
 }
 
 interface ApiResponse<T> {
@@ -29,8 +28,8 @@ interface ApiResponse<T> {
 const columnHelper = createColumnHelper<Invoice>();
 
 const columns = [
-  columnHelper.accessor("id", {
-    header: "ID",
+  columnHelper.accessor("number", {
+    header: "Number",
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("date", {
@@ -41,8 +40,8 @@ const columns = [
     header: "Employee Name",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("total", {
-    header: "Total",
+  columnHelper.accessor("subtotal", {
+    header: "Subtotal",
     cell: (info) => `$${info.getValue().toFixed(2)}`,
   }),
 ];
@@ -82,8 +81,8 @@ function InvoicesPage() {
   const [endDate, setEndDate] = useState(
     searchParams.get("end_date") || defaultEnd,
   );
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(
-    searchParams.get("employee_id") || "",
+  const [selectedEmployee, setSelectedEmployee] = useState<string>(
+    searchParams.get("employee") || "",
   );
   const [filtersExpanded, setFiltersExpanded] = useState(true);
 
@@ -92,11 +91,11 @@ function InvoicesPage() {
     const params = new URLSearchParams();
     params.set("start_date", startDate);
     params.set("end_date", endDate);
-    if (selectedEmployeeId) {
-      params.set("employee_id", selectedEmployeeId);
+    if (selectedEmployee) {
+      params.set("employee", selectedEmployee);
     }
     setSearchParams(params, { replace: true });
-  }, [startDate, endDate, selectedEmployeeId, setSearchParams]);
+  }, [startDate, endDate, selectedEmployee, setSearchParams]);
 
   // Fetch employees on mount and sort alphabetically
   useEffect(() => {
@@ -151,8 +150,8 @@ function InvoicesPage() {
       end_date: endDate,
     });
 
-    if (selectedEmployeeId) {
-      params.append("employee_id", selectedEmployeeId);
+    if (selectedEmployee) {
+      params.append("employee", selectedEmployee);
     }
 
     try {
@@ -171,7 +170,7 @@ function InvoicesPage() {
     } finally {
       setLoading(false);
     }
-  }, [startDate, endDate, selectedEmployeeId]);
+  }, [startDate, endDate, selectedEmployee]);
 
   // Debounced invoice fetch
   useEffect(() => {
@@ -256,13 +255,13 @@ function InvoicesPage() {
                 </label>
                 <select
                   id="employee"
-                  value={selectedEmployeeId}
-                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  value={selectedEmployee}
+                  onChange={(e) => setSelectedEmployee(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">All Employees</option>
                   {employees.map((emp) => (
-                    <option key={emp.id} value={emp.id.toString()}>
+                    <option key={emp.id} value={emp.name}>
                       {emp.name}
                     </option>
                   ))}
