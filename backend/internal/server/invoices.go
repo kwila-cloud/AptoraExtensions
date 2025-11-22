@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// TODO: move to separate file
 func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -100,6 +99,10 @@ func (s *Server) handleInvoices(w http.ResponseWriter, r *http.Request) {
 		Date         string  `json:"date"`
 		EmployeeName string  `json:"employee_name"`
 		Subtotal     float64 `json:"subtotal"`
+		// TODO: add total_cost
+		// TODO: add gross_profit (subtotal - total_cost)
+		// TODO: add gross_profit_percentage gross_profit / subtotal
+		// TODO: add is_write_off
 	}
 
 	s.logger.Info("hello!")
